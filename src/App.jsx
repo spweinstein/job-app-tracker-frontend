@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./App.css";
-import CompanyList from "./components/CompanyList.jsx";
+import CompanyPage from "./components/CompanyPage.jsx";
+import { Routes, Route } from "react-router";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -8,7 +9,7 @@ function App() {
   return (
     <>
       <h1>Job Application Tracker</h1>
-      <CompanyList />
+      <CompanyPage />
     </>
   );
 }

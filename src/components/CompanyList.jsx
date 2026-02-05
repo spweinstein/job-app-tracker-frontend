@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-
 import * as companyService from "../services/companyService.js";
+import CompanyDetails from "./CompanyDetails.jsx";
 
-const CompanyList = () => {
+const CompanyList = ({ setSelected }) => {
   const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
@@ -13,14 +13,25 @@ const CompanyList = () => {
     fetchCompanies();
   }, []);
 
+  if (!companies)
+    return (
+      <>
+        <h2>Companies</h2>
+        <p>No companies found</p>
+      </>
+    );
+
   return (
     <>
-      <h2>Companies</h2>
+      <h3>Companies</h3>
       <ul>
         {companies.map((company) => (
-          <li key={company._id}>
-            <p>Company: {company.name}</p>
-            <p>Description: {company.description}</p>
+          <li
+            style={{ cursor: "pointer", color: "#646CFF" }}
+            key={company._id}
+            onClick={() => setSelected(company._id)}
+          >
+            {company.name}
           </li>
         ))}
       </ul>
