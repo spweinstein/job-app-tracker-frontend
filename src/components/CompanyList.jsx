@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import * as companyService from "../services/companyService.js";
-import CompanyDetails from "./CompanyDetails.jsx";
+import { getCompanies } from "../services/companyService.js";
+import { Link } from "react-router";
 
-const CompanyList = ({ setSelected }) => {
+const CompanyList = () => {
   const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
     const fetchCompanies = async () => {
-      const companies = await companyService.getCompanies();
+      const companies = await getCompanies();
       setCompanies(companies);
     };
     fetchCompanies();
@@ -24,14 +24,13 @@ const CompanyList = ({ setSelected }) => {
   return (
     <>
       <h3>Companies</h3>
+      <button>
+        <Link to="/companies/new">Create</Link>
+      </button>
       <ul>
         {companies.map((company) => (
-          <li
-            style={{ cursor: "pointer", color: "#646CFF" }}
-            key={company._id}
-            onClick={() => setSelected(company._id)}
-          >
-            {company.name}
+          <li key={company._id}>
+            <Link to={`${company._id}`}>{company.name}</Link>
           </li>
         ))}
       </ul>

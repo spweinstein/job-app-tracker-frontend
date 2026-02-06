@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { createCompany } from "../services/companyService";
-import { useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { updateCompany, getCompany } from "../services/companyService";
+import { useNavigate, useParams } from "react-router";
 
 const CompanyForm = () => {
   const [formData, setFormData] = useState({
@@ -8,8 +8,21 @@ const CompanyForm = () => {
     description: "",
     notes: "",
   });
+  const { companyId } = useParams();
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCompany = async () => {
+      try {
+        const res = await getCompany(companyId);
+        setFormData(res[0]);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    fetchCompany();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,7 +31,7 @@ const CompanyForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await createCompany(formData);
+    const res = await updateCompany(companyId, formData);
     console.log(res);
     navigate("/companies");
   };
@@ -55,7 +68,7 @@ const CompanyForm = () => {
           onChange={handleChange}
         />
       </div>
-      <button type="submit">Add Company</button>
+      <button type="submit">Save Company</button>
     </form>
   );
 };

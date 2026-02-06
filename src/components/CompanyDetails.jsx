@@ -1,27 +1,32 @@
 import { useState, useEffect } from "react";
-import * as companyService from "../services/companyService.js";
+import { getCompany, deleteCompany } from "../services/companyService.js";
+import { useParams, useNavigate } from "react-router";
+import { Link } from "react-router";
 
-const CompanyDetails = ({ selectedCompanyId }) => {
+const CompanyDetails = ({}) => {
   const [company, setCompany] = useState({ _id: null });
+  const { companyId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!selectedCompanyId) return;
     const fetchCompany = async () => {
       try {
-        const res = await companyService.getCompany(selectedCompanyId);
+        const res = await getCompany(companyId);
         setCompany(res[0]);
-        console.log(selectedCompanyId, res);
       } catch (e) {
         console.log(e);
       }
     };
-    console.log(selectedCompanyId);
-
     fetchCompany();
-  }, [selectedCompanyId]);
+  }, []);
+
+  const handleDeleteClick = async () => {
+    deleteCompany(companyId);
+    navigate("/companies");
+  };
 
   if (company._id === null) {
-    return <></>;
+    return <h3>Loading...</h3>;
   }
 
   if (!company.name) {
@@ -30,9 +35,17 @@ const CompanyDetails = ({ selectedCompanyId }) => {
 
   return (
     <>
-      <h3>Company: {company.name}</h3>
-      {company.description ? <p>Description: {company.description}</p> : ""}
-      {company.notes ? <p>Notes: {company.notes}</p> : ""}
+      <div>
+        <h3>Company: {company.name}</h3>
+        {company.description ? <p>Description: {company.description}</p> : ""}
+        {company.notes ? <p>Notes: {company.notes}</p> : ""}
+      </div>
+      <div>
+        <button>
+          <Link to={`/companies/${companyId}/edit`}>Edit</Link>
+        </button>
+        <button onClick={handleDeleteClick}>Delete</button>
+      </div>
     </>
   );
 };

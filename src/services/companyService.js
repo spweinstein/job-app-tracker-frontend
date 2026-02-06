@@ -1,20 +1,55 @@
+import axios from "axios";
+import { api } from "./api.js";
+
 const BASE_URL = `${import.meta.env.VITE_BACK_END_SERVER_URL}/companies`;
 
-const getCompanies = async () => {
+export const getCompanies = async () => {
   try {
-    const res = await fetch(BASE_URL);
-    return res.json();
+    const { data } = await api.get("/companies");
+    if (data.err) throw new Error(data.err);
+    console.log(data);
+
+    return data;
   } catch (err) {
     console.log(err);
   }
 };
 
-const getCompany = async (companyId) => {
+export const getCompany = async (companyId) => {
   try {
-    const res = await fetch(BASE_URL + "/" + companyId);
-    const ret = res.json();
-    // console.log(ret);
-    return ret; //res.json();
+    const { data } = await api.get(`/companies/${companyId}`);
+    if (data.err) throw new Error(data.err);
+    return data;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const createCompany = async (formData) => {
+  try {
+    const { data } = await api.post("/companies", formData);
+    if (data.err) throw new Error(data.err);
+    return data;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const updateCompany = async (companyId, formData) => {
+  try {
+    const { data } = await api.put(`/companies/${companyId}`, formData);
+    if (data.err) throw new Error(data.err);
+    return data;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const deleteCompany = async (companyId) => {
+  try {
+    const { data } = await api.delete(`/companies/${companyId}`);
+    if (data.err) throw new Error(data.err);
+    return data;
   } catch (e) {
     console.log(e);
   }
@@ -22,4 +57,4 @@ const getCompany = async (companyId) => {
 
 // console.log(await getCompanies());
 // getCompany("6983a57a005db84266a160db");
-export { getCompanies, getCompany };
+getCompanies();
