@@ -57,4 +57,4 @@ export const deleteCompany = async (companyId) => {
 
 // console.log(await getCompanies());
 // getCompany("6983a57a005db84266a160db");
-getCompanies();
+// getCompanies();
