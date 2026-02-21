@@ -1,7 +1,4 @@
-import axios from "axios";
 import { api } from "./api.js";
-
-const BASE_URL = `${import.meta.env.VITE_BACK_END_SERVER_URL}/companies`;
 
 export const getCompanies = async () => {
   try {
@@ -54,7 +51,3 @@ export const deleteCompany = async (companyId) => {
     console.log(e);
   }
 };
-
-// console.log(await getCompanies());
-// getCompany("6983a57a005db84266a160db");
-// getCompanies();
