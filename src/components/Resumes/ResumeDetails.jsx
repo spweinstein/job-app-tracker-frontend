@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { getResume, deleteResume } from "../../services/resumeService.js";
-import { useParams, useNavigate, Link } from "react-router";
-import { PageContainer } from "../shared/layout/index.js";
+import { useParams, useNavigate } from "react-router";
 import "./Resume.css";
-import { DeleteButton } from "../shared/ui/index.js";
+import { BackButton, EditButton, DeleteButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
 
@@ -15,7 +14,7 @@ const formatDate = (dateStr) => {
   });
 };
 
-const ResumeDetails = () => {
+const ResumeDetails = ({ setHeader = () => {} }) => {
   const {errors, addError, clearErrors} = useErrors();
   const [resume, setResume] = useState({ _id: null });
   const { resumeId } = useParams();
@@ -42,25 +41,27 @@ const ResumeDetails = () => {
     }
   };
 
+  useEffect(() => {
+    setHeader({
+      title: "Resume Details",
+      actions: (
+        <>
+          <BackButton onClick={() => navigate(-1)} />
+          <EditButton onClick={() => navigate(`/resumes/${resumeId}/edit`)} />
+          <DeleteButton onClick={handleDeleteClick} />
+        </>
+      ),
+    });
+  }, [resumeId]);
+
   if (resume?._id === null) return <h3>Loading...</h3>;
   if (!resume?._id) return <h3>Resume Not Found</h3>;
 
   return (
-    <PageContainer
-      title="Resume"
-      actions={
-        <>
-          <Link
-            to={`/resumes/${resumeId}/edit`}
-            className="btn btn-primary btn-sm"
-          >
-            Edit
-          </Link>
-          <DeleteButton onClick={handleDeleteClick} />
-        </>
-      }
-      errors={errors}
-    >
+    <>
+      {errors.length > 0 && (
+        <div id="error-message">{errors.map((e) => <p key={e}>{e}</p>)}</div>
+      )}
       <div className="resume-container">
         {/* Header */}
         <div className="resume-header">
@@ -215,7 +216,7 @@ const ResumeDetails = () => {
       )}
 
       <DocumentLineagePanel document={resume} basePath="/resumes" />
-    </PageContainer>
+    </>
   );
 };
 

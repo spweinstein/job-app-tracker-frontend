@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { getCompany, deleteCompany } from "../../services/companyService.js";
-import { deleteApplication, getApplications } from "../../services/applicationService.js";
+import { deleteApplication } from "../../services/applicationService.js";
 import { useParams, useNavigate, Link } from "react-router";
-import { PageContainer } from "../shared/layout";
 import { DataTable } from "../shared/views/index.js";
-import { DeleteButton, EditButton } from "../shared/ui/index.js";
+import { DeleteButton, EditButton, BackButton } from "../shared/ui/index.js";
 import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
 import useErrors from "../../hooks/useErrors.js";
 
-const CompanyDetails = () => {
+const CompanyDetails = ({ setHeader = () => {} }) => {
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const {errors, addError, clearErrors} = useErrors();
@@ -63,6 +62,19 @@ const CompanyDetails = () => {
     }
     fetchRelatedApplications();
   };
+
+  useEffect(() => {
+    setHeader({
+      title: "Company Details",
+      actions: (
+        <>
+          <BackButton onClick={() => navigate(-1)} />
+          <EditButton onClick={() => navigate(`/companies/${companyId}/edit`)} />
+          <DeleteButton onClick={handleDeleteCompany} />
+        </>
+      ),
+    });
+  }, [companyId]);
 
   if (loading) return <p>Loading…</p>;
   if (!company?._id) return <h3>Company Not Found</h3>;
@@ -122,21 +134,10 @@ const CompanyDetails = () => {
   ];
 
   return (
-    <PageContainer
-      title="Company Details"
-      actions={
-        <>
-          <Link
-            to={`/companies/${companyId}/edit`}
-            className="btn btn-primary btn-sm"
-          >
-            Edit
-          </Link>
-          <DeleteButton onClick={handleDeleteCompany} />
-        </>
-      }
-      errors={errors}
-    >
+    <>
+      {errors.length > 0 && (
+        <div id="error-message">{errors.map((e) => <p key={e}>{e}</p>)}</div>
+      )}
       <DetailsCard
         title={{ label: "Company", value: company.name }}
         fields={[
@@ -157,7 +158,7 @@ const CompanyDetails = () => {
         sortField="updatedAt"
         sortDir="desc"
       />
-    </PageContainer>
+    </>
   );
 };
 

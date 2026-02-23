@@ -4,16 +4,39 @@ import {
   deleteApplication,
 } from "../../services/applicationService.js";
 import { useParams, useNavigate, Link } from "react-router";
-import { PageContainer } from "../shared/layout/index.js";
 import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
-import { DeleteButton } from "../shared/ui/index.js";
+import { DeleteButton, EditButton, BackButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
-const ApplicationDetails = () => {
+const ApplicationDetails = ({setHeader = () => {}}) => {
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const {errors, addError, clearErrors} = useErrors();
   const { applicationId } = useParams();
+
+  const handleDeleteClick = async () => {
+    try {
+      await deleteApplication(applicationId);
+      navigate("/applications");
+    } catch (e) {
+      addError(e.message);
+    }
+  };
+
+  useEffect(() => {
+    if (setHeader && typeof setHeader === "function") {
+    setHeader({
+      title: "Application Details",
+      // Back, Edit, and Delete buttons
+      actions: 
+      <>
+        <BackButton onClick={() => navigate(-1)} />
+        <EditButton onClick={() => navigate(`/applications/${applicationId}/edit`)} />
+        <DeleteButton onClick={handleDeleteClick} />
+      </>
+    });
+    }
+  }, []);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,34 +53,10 @@ const ApplicationDetails = () => {
     fetchApplication();
   }, [applicationId]);
 
-  const handleDeleteClick = async () => {
-    try {
-      await deleteApplication(applicationId);
-      navigate("/applications");
-    } catch (e) {
-      addError(e.message);
-    }
-  };
-
   if (loading) return <p>Loading…</p>;
   if (!application?._id) return <h3>Application Not Found</h3>;
 
   return (
-    <PageContainer
-      title={"Application Details"}
-      actions={
-        <>
-          <Link
-            to={`/applications/${applicationId}/edit`}
-            className="btn btn-primary btn-sm"
-          >
-            Edit
-          </Link>
-          <DeleteButton onClick={handleDeleteClick} />
-        </>
-      }
-      errors={errors}
-    >
       <DetailsCard
         title={{
           label: "Company",
@@ -110,7 +109,6 @@ const ApplicationDetails = () => {
           },
         ]}
       />
-    </PageContainer>
   );
 };
 

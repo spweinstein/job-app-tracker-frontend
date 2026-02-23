@@ -9,10 +9,10 @@ import { getResumes } from "../../services/resumeService.js";
 import { useNavigate, useParams } from "react-router";
 import { FormRow,FormField, TextInput, SelectInput, DateInput, FormContainer, SearchableSelect } from "../shared/forms";
 import { PageContainer } from "../shared/layout";
-import { DeleteButton } from "../shared/ui/index.js";
+import { DeleteButton, BackButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
-const ApplicationEdit = () => {
+const ApplicationEdit = ({setHeader = () => {}}) => {
   const {errors, addError, clearErrors} = useErrors();
   const [formData, setFormData] = useState({
     title: "",
@@ -24,6 +24,17 @@ const ApplicationEdit = () => {
     appliedAt: "",
     url: "",
   });
+  useEffect(() => {
+    if (setHeader && typeof setHeader === "function") {
+    setHeader({
+      title: "Edit Application",
+      actions: <>
+        <BackButton onClick={() => navigate(-1)} />
+        <DeleteButton onClick={handleDeleteClick} />
+      </>,
+    });
+    }
+  }, []);
   const { applicationId } = useParams();
   const navigate = useNavigate();
 
@@ -84,13 +95,6 @@ const ApplicationEdit = () => {
   };
 
   return (
-    <PageContainer
-      title="Edit Application"
-      actions={
-        <DeleteButton onClick={handleDeleteClick} />
-      }
-      errors={errors}
-    >
       <FormContainer onSubmit={handleSubmit}>
         <FormRow>
           <FormField label="Company">
@@ -171,7 +175,6 @@ const ApplicationEdit = () => {
           <button type="submit">Edit Application</button>
         </div>
       </FormContainer>
-    </PageContainer>
   );
 };
 

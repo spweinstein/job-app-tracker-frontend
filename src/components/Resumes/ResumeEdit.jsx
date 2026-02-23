@@ -16,8 +16,7 @@ import {
   RepeatableFieldGroup,
   SearchableSelect,
 } from "../shared/forms";
-import { PageContainer } from "../shared/layout";
-import { DeleteButton } from "../shared/ui/index.js";
+import { DeleteButton, BackButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
 const EMPTY_EXPERIENCE = {
@@ -56,7 +55,7 @@ const loadCompanies = async (q) => {
   return res.data.map((c) => ({ label: c.name, value: c._id }));
 };
 
-const ResumeEdit = () => {
+const ResumeEdit = ({ setHeader = () => {} }) => {
   const {errors, addError, clearErrors} = useErrors();
   const [formData, setFormData] = useState({
     name: "",
@@ -157,15 +156,20 @@ const ResumeEdit = () => {
     }
   };
 
+  useEffect(() => {
+    setHeader({
+      title: "Edit Resume",
+      actions: (
+        <>
+          <BackButton onClick={() => navigate(-1)} />
+          <DeleteButton onClick={handleDeleteClick} />
+        </>
+      ),
+    });
+  }, [resumeId]);
+
   return (
-    <PageContainer
-      title="Edit Resume"
-      actions={
-        <DeleteButton onClick={handleDeleteClick} />
-      }
-      errors={errors}
-    >
-      <FormContainer onSubmit={handleSubmit}>
+      <FormContainer onSubmit={handleSubmit} errors={errors}>
         <FormField label="Name">
           <TextInput
             name="name"
@@ -396,7 +400,6 @@ const ResumeEdit = () => {
           <button type="submit">Save Resume</button>
         </div>
       </FormContainer>
-    </PageContainer>
   );
 };
 

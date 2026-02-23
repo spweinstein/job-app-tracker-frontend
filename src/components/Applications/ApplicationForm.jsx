@@ -7,8 +7,9 @@ import { FormRow, FormField, TextInput, SelectInput, DateInput, FormContainer } 
 import { PageContainer } from "../shared/layout";
 import useErrors from "../../hooks/useErrors.js";
 import { SearchableSelect } from "../shared/forms";
+import { BackButton } from "../shared/ui/index.js";
 
-const ApplicationForm = () => {
+const ApplicationForm = ({setHeader = () => {}}) => {
   const {errors, addError, clearErrors} = useErrors();
   const [formData, setFormData] = useState({
     title: "",
@@ -20,7 +21,17 @@ const ApplicationForm = () => {
     appliedAt: new Date().toISOString().split("T")[0],
     url: "",
   });
-  
+  useEffect(() => {
+    if (setHeader && typeof setHeader === "function") {
+    setHeader({
+      title: "New Application",
+      // Back button
+      actions: <>
+      <BackButton onClick={() => navigate(-1)} />
+      </>,
+    });
+    }
+  }, []);
   const navigate = useNavigate();
 
   const loadCompanies = async (q) => {
@@ -49,7 +60,6 @@ const ApplicationForm = () => {
   };
 
   return (
-    <PageContainer title="New Application" errors={errors}>
       <FormContainer onSubmit={handleSubmit}>
         <FormRow>
           <FormField label="Company">
@@ -130,7 +140,6 @@ const ApplicationForm = () => {
           <button type="submit">Add Application</button>
         </div>
       </FormContainer>
-    </PageContainer>
   );
 };
 

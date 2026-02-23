@@ -19,12 +19,12 @@ const ApplicationPage = () => {
 
   return (
     <PageContainer title={title} actions={actions} errors={errors}>
-    <Routes>
-      <Route index element={<ApplicationList setHeader={setHeader} />} />
-      <Route path="/new" element={<ApplicationForm />} />
-      <Route path="/:applicationId/edit" element={<ApplicationEdit />} />
-      <Route path="/:applicationId" element={<ApplicationDetails setHeader={setHeader} />} />
-    </Routes>
+      <Routes>
+        <Route index element={<ApplicationList setHeader={setHeader} />} />
+        <Route path="/new" element={<ApplicationForm setHeader={setHeader} />} />
+        <Route path="/:applicationId/edit" element={<ApplicationEdit setHeader={setHeader} />} />
+        <Route path="/:applicationId" element={<ApplicationDetails setHeader={setHeader} />} />
+      </Routes>
     </PageContainer>
   );
 };

@@ -5,17 +5,16 @@ import {
   deleteCoverLetter,
 } from "../../services/coverLetterService.js";
 import { useNavigate, useParams } from "react-router";
-import { PageContainer } from "../shared/layout/index.js";
 import {
   TextInput,
   TextAreaInput,
   FormContainer,
   FormField,
 } from "../shared/forms/index.js";
-import { DeleteButton } from "../shared/ui/index.js";
+import { BackButton, DeleteButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
-const CoverLetterEdit = () => {
+const CoverLetterEdit = ({ setHeader = () => {} }) => {
   const {errors, addError, clearErrors} = useErrors();
   const [formData, setFormData] = useState({
     name: "",
@@ -66,40 +65,44 @@ const CoverLetterEdit = () => {
     }
   };
 
-  return (
-    <PageContainer
-      title="Edit Cover Letter"
-      actions={
-        <DeleteButton onClick={handleDeleteClick} />
-      }
-      errors={errors}
-    >
-      <FormContainer className="crud-form" onSubmit={handleSubmit}>
-        <FormField label="Name">
-          <TextInput
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-          />
-        </FormField>
+  useEffect(() => {
+    setHeader({
+      title: "Edit Cover Letter",
+      actions: (
+        <>
+          <BackButton onClick={() => navigate(-1)} />
+          <DeleteButton onClick={handleDeleteClick} />
+        </>
+      ),
+    });
+  }, [coverLetterId]);
 
-        <FormField label="Body">
-          <TextAreaInput
-            name="body"
-            value={formData.body}
-            onChange={handleChange}
-          />
-        </FormField>
-        <FormField label="Notes">
-          <TextAreaInput
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-          />
-        </FormField>
-        <button type="submit">Save Cover Letter</button>
-      </FormContainer>
-    </PageContainer>
+  return (
+    <FormContainer className="crud-form" onSubmit={handleSubmit} errors={errors}>
+      <FormField label="Name">
+        <TextInput
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+        />
+      </FormField>
+
+      <FormField label="Body">
+        <TextAreaInput
+          name="body"
+          value={formData.body}
+          onChange={handleChange}
+        />
+      </FormField>
+      <FormField label="Notes">
+        <TextAreaInput
+          name="notes"
+          value={formData.notes}
+          onChange={handleChange}
+        />
+      </FormField>
+      <button type="submit">Save Cover Letter</button>
+    </FormContainer>
   );
 };
 

@@ -3,14 +3,13 @@ import {
   getCoverLetter,
   deleteCoverLetter,
 } from "../../services/coverLetterService.js";
-import { useParams, useNavigate, Link } from "react-router";
-import { PageContainer } from "../shared/layout/index.js";
+import { useParams, useNavigate } from "react-router";
 import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
-import { DeleteButton } from "../shared/ui/index.js";
+import { BackButton, EditButton, DeleteButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
 
-const CoverLetterDetails = () => {
+const CoverLetterDetails = ({ setHeader = () => {} }) => {
   const [coverLetter, setCoverLetter] = useState(null);
   const [loading, setLoading] = useState(true);
   const {errors, addError, clearErrors} = useErrors();
@@ -40,25 +39,27 @@ const CoverLetterDetails = () => {
     }
   };
 
+  useEffect(() => {
+    setHeader({
+      title: "Cover Letter Details",
+      actions: (
+        <>
+          <BackButton onClick={() => navigate(-1)} />
+          <EditButton onClick={() => navigate(`/cover-letters/${coverLetterId}/edit`)} />
+          <DeleteButton onClick={handleDeleteClick} />
+        </>
+      ),
+    });
+  }, [coverLetterId]);
+
   if (loading) return <p>Loading…</p>;
   if (!coverLetter?._id) return <h3>Cover Letter Not Found</h3>;
 
   return (
-    <PageContainer
-      title={coverLetter.name}
-      actions={
-        <>
-          <Link
-            to={`/cover-letters/${coverLetterId}/edit`}
-            className="btn btn-primary btn-sm"
-          >
-            Edit
-          </Link>
-          <DeleteButton onClick={handleDeleteClick} />
-        </>
-      }
-      errors={errors}
-    >
+    <>
+      {errors.length > 0 && (
+        <div id="error-message">{errors.map((e) => <p key={e}>{e}</p>)}</div>
+      )}
       <DetailsCard
         title={{ label: "Name",    value: coverLetter.name }}
         subtitle={{ label: "Version", value: `v${coverLetter.version || "0"}` }}
@@ -68,7 +69,7 @@ const CoverLetterDetails = () => {
         ]}
       />
       <DocumentLineagePanel document={coverLetter} basePath="/cover-letters" />
-    </PageContainer>
+    </>
   );
 };
 

@@ -13,6 +13,7 @@ const usePaginatedQuery = (fetchFn, options = {}) => {
     defaultSort = "updatedAt",
     defaultSortDir = "desc",
     defaultLimit = 10,
+    params
   } = options;
 
   const [query, setQueryState] = useState("");
