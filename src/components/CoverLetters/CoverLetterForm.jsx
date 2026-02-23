@@ -7,11 +7,12 @@ import {
   FormContainer,
   FormField,
 } from "../shared/forms/index.js";
-import { BackButton } from "../shared/ui/index.js";
+import { BackButton, SubmitButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
 const CoverLetterForm = ({ setHeader = () => {} }) => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     body: "",
@@ -52,6 +53,7 @@ const CoverLetterForm = ({ setHeader = () => {} }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/ebbbd420-2498-4129-a13e-5fc82c7a528f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'CoverLetterForm.jsx:handleSubmit',message:'submitting new cover letter',hypothesisId:'D',data:{parentId,parentIncluded:!!parentId},timestamp:Date.now()})}).catch(()=>{});
     // #endregion
@@ -63,6 +65,8 @@ const CoverLetterForm = ({ setHeader = () => {} }) => {
       navigate("/cover-letters");
     } catch (e) {
       addError(e.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -90,7 +94,10 @@ const CoverLetterForm = ({ setHeader = () => {} }) => {
           onChange={handleChange}
         />
       </FormField>
-      <button type="submit">Save Cover Letter</button>
+      <div className="actions">
+        <SubmitButton loading={submitting}>Save Cover Letter</SubmitButton>
+        <CancelButton onClick={() => navigate(-1)} />
+      </div>
     </FormContainer>
   );
 };

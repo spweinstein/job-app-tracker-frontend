@@ -7,10 +7,11 @@ import { FormRow, FormField, TextInput, SelectInput, DateInput, FormContainer } 
 import { PageContainer } from "../shared/layout";
 import useErrors from "../../hooks/useErrors.js";
 import { SearchableSelect } from "../shared/forms";
-import { BackButton } from "../shared/ui/index.js";
+import { BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 
 const ApplicationForm = ({setHeader = () => {}}) => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     company: "",
@@ -51,11 +52,14 @@ const ApplicationForm = ({setHeader = () => {}}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       await createApplication({...formData, company: formData.company?._id ?? formData.company, resume: formData.resume?._id ?? formData.resume});
       navigate("/applications");
     } catch (e) {
       addError(e.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -137,7 +141,8 @@ const ApplicationForm = ({setHeader = () => {}}) => {
           />
         </FormField>
         <div className="actions">
-          <button type="submit">Add Application</button>
+          <SubmitButton loading={submitting}>Add Application</SubmitButton>
+          <CancelButton onClick={() => navigate(-1)} />
         </div>
       </FormContainer>
   );

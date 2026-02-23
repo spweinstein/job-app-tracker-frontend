@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { getResume, deleteResume } from "../../services/resumeService.js";
 import { useParams, useNavigate } from "react-router";
 import "./Resume.css";
-import { BackButton, EditButton, DeleteButton } from "../shared/ui/index.js";
+import { BackButton, EditButton, DeleteButton, LoadingSpinner } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
+
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
@@ -54,7 +55,7 @@ const ResumeDetails = ({ setHeader = () => {} }) => {
     });
   }, [resumeId]);
 
-  if (resume?._id === null) return <h3>Loading...</h3>;
+  if (resume?._id === null) return <LoadingSpinner />;
   if (!resume?._id) return <h3>Resume Not Found</h3>;
 
   return (

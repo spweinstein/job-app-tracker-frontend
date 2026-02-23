@@ -3,10 +3,11 @@ import { createCompany } from "../../services/companyService";
 import { useNavigate } from "react-router";
 import { FormRow, FormField, TextInput, TextAreaInput, FormContainer } from "../shared/forms";
 import useErrors from "../../hooks/useErrors.js";
-import { BackButton } from "../shared/ui/index.js";
+import { BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 
 const CompanyForm = ({ setHeader = () => {} }) => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     url: "",
@@ -30,11 +31,14 @@ const CompanyForm = ({ setHeader = () => {} }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const res = await createCompany(formData);
       navigate("/companies");
     } catch (e) {
       addError(e.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -68,7 +72,8 @@ const CompanyForm = ({ setHeader = () => {} }) => {
         />
       </FormField>
       <div className="actions">
-        <button type="submit">Add New Company</button>
+        <SubmitButton loading={submitting}>Add New Company</SubmitButton>
+        <CancelButton onClick={() => navigate(-1)} />
       </div>
     </FormContainer>
   );

@@ -13,7 +13,7 @@ import {
   SearchableSelect,
 } from "../shared/forms";
 import { FormRow } from "../shared/forms";
-import { BackButton } from "../shared/ui/index.js";
+import { BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
 const EMPTY_EXPERIENCE = {
@@ -54,6 +54,7 @@ const loadCompanies = async (q) => {
 
 const ResumeForm = ({ setHeader = () => {} }) => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const [searchParams] = useSearchParams();
   const parentId = searchParams.get("parentId");
   const [formData, setFormData] = useState({
@@ -126,6 +127,7 @@ const ResumeForm = ({ setHeader = () => {} }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       await createResume({
         ...formData,
@@ -135,6 +137,8 @@ const ResumeForm = ({ setHeader = () => {} }) => {
       navigate("/resumes");
     } catch (e) {
       addError(e.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -369,7 +373,8 @@ const ResumeForm = ({ setHeader = () => {} }) => {
       />
 
       <div className="actions">
-        <button type="submit">Add Resume</button>
+        <SubmitButton loading={submitting}>Add Resume</SubmitButton>
+        <CancelButton onClick={() => navigate(-1)} />
       </div>
     </FormContainer>
   );

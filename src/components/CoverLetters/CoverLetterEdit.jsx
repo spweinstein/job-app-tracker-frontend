@@ -11,11 +11,12 @@ import {
   FormContainer,
   FormField,
 } from "../shared/forms/index.js";
-import { BackButton, DeleteButton } from "../shared/ui/index.js";
+import { BackButton, DeleteButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
 const CoverLetterEdit = ({ setHeader = () => {} }) => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     body: "",
@@ -48,12 +49,15 @@ const CoverLetterEdit = ({ setHeader = () => {} }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       await updateCoverLetter(coverLetterId, formData);
+      navigate(`/cover-letters/${coverLetterId}`);
     } catch (e) {
       addError(e.message);
+    } finally {
+      setSubmitting(false);
     }
-    navigate(`/cover-letters/${coverLetterId}`);
   };
 
   const handleDeleteClick = async () => {
@@ -101,7 +105,10 @@ const CoverLetterEdit = ({ setHeader = () => {} }) => {
           onChange={handleChange}
         />
       </FormField>
-      <button type="submit">Save Cover Letter</button>
+      <div className="actions">
+        <SubmitButton loading={submitting}>Save Cover Letter</SubmitButton>
+        <CancelButton onClick={() => navigate(-1)} />
+      </div>
     </FormContainer>
   );
 };

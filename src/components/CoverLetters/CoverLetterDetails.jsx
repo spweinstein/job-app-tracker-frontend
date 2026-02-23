@@ -5,7 +5,7 @@ import {
 } from "../../services/coverLetterService.js";
 import { useParams, useNavigate } from "react-router";
 import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
-import { BackButton, EditButton, DeleteButton } from "../shared/ui/index.js";
+import { BackButton, EditButton, DeleteButton, LoadingSpinner } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
 
@@ -52,7 +52,7 @@ const CoverLetterDetails = ({ setHeader = () => {} }) => {
     });
   }, [coverLetterId]);
 
-  if (loading) return <p>Loading…</p>;
+    if (loading) return <LoadingSpinner />;
   if (!coverLetter?._id) return <h3>Cover Letter Not Found</h3>;
 
   return (

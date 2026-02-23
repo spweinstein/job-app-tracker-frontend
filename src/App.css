@@ -2,6 +2,10 @@
 @import url("./tokens.css");
 @import url("./components/shared/ui/Button.css");
 @import url("./components/shared/ui/Badge.css");
+@import url("./components/shared/ui/LoadingSpinner.css");
+@import url("./components/shared/ui/NotFound.css");
+@import url("./components/shared/ui/SubmitButton.css");
+@import url("./components/shared/ui/CancelButton.css");
 
 h1 {
   color: var(--primary);

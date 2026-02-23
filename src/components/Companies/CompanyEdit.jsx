@@ -6,11 +6,12 @@ import {
 } from "../../services/companyService";
 import { useNavigate, useParams } from "react-router";
 import { FormRow, FormField, TextInput, FormContainer, TextAreaInput } from "../shared/forms";
-import { DeleteButton, BackButton } from "../shared/ui/index.js";
+import { DeleteButton, BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
 const CompanyEdit = ({ setHeader = () => {} }) => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     url: "",
@@ -40,6 +41,7 @@ const CompanyEdit = ({ setHeader = () => {} }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const res = await updateCompany(companyId, formData);
       if (res.error) {
@@ -48,6 +50,8 @@ const CompanyEdit = ({ setHeader = () => {} }) => {
       navigate(`/companies/${companyId}`);
     } catch (e) {
       addError(e.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -102,7 +106,8 @@ const CompanyEdit = ({ setHeader = () => {} }) => {
         />
       </FormField>
       <div className="actions">
-        <button type="submit">Save Company</button>
+        <SubmitButton loading={submitting}>Save Company</SubmitButton>
+        <CancelButton onClick={() => navigate(-1)} />
       </div>
     </FormContainer>
   );

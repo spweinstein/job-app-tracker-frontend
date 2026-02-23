@@ -7,6 +7,7 @@ import { useParams, useNavigate, Link } from "react-router";
 import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
 import { DeleteButton, EditButton, BackButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
+import { LoadingSpinner } from "../shared/ui/index.js";
 
 const ApplicationDetails = ({setHeader = () => {}}) => {
   const [application, setApplication] = useState(null);
@@ -53,7 +54,7 @@ const ApplicationDetails = ({setHeader = () => {}}) => {
     fetchApplication();
   }, [applicationId]);
 
-  if (loading) return <p>Loading…</p>;
+  if (loading) return <LoadingSpinner />;
   if (!application?._id) return <h3>Application Not Found</h3>;
 
   return (

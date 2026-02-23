@@ -16,7 +16,7 @@ import {
   RepeatableFieldGroup,
   SearchableSelect,
 } from "../shared/forms";
-import { DeleteButton, BackButton } from "../shared/ui/index.js";
+import { DeleteButton, BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
 const EMPTY_EXPERIENCE = {
@@ -57,6 +57,7 @@ const loadCompanies = async (q) => {
 
 const ResumeEdit = ({ setHeader = () => {} }) => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     link: "",
@@ -120,6 +121,7 @@ const ResumeEdit = ({ setHeader = () => {} }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try { 
       await updateResume(resumeId, {
         ...formData,
@@ -144,6 +146,8 @@ const ResumeEdit = ({ setHeader = () => {} }) => {
       navigate(`/resumes/${resumeId}`);
     } catch (e) {
       addError(e.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -397,7 +401,8 @@ const ResumeEdit = ({ setHeader = () => {} }) => {
         />
 
         <div className="actions">
-          <button type="submit">Save Resume</button>
+          <SubmitButton loading={submitting}>Save Resume</SubmitButton>
+          <CancelButton onClick={() => navigate(-1)} />
         </div>
       </FormContainer>
   );

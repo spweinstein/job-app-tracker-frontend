@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getCompanies, deleteCompany } from "../../services/companyService.js";
 import { Link, useNavigate } from "react-router";
 import { DataTable } from "../shared/views/index.js";
-import { DeleteButton, EditButton } from "../shared/ui/index.js";
+import { DeleteButton, EditButton, LoadingSpinner } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
@@ -79,14 +79,18 @@ const CompanyList = ({ setHeader = () => {} }) => {
         total={total}
       />
       <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-      <DataTable
-        columns={columns}
-        data={data}
-        sortField={sortField}
-        sortDir={sortDir}
-        onSort={toggleSort}
-        emptyState={loading ? <p>Loading…</p> : <p>No companies found.</p>}
-      />
+      {loading ? (
+        <LoadingSpinner />
+        ) : (
+        <DataTable
+          columns={columns}
+          data={data}
+          sortField={sortField}
+          sortDir={sortDir}
+          onSort={toggleSort}
+          emptyState={<p>No companies found.</p>}
+        />
+      )}
     </>
   );
 };

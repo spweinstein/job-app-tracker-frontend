@@ -6,6 +6,7 @@ import { DataTable } from "../shared/views/index.js";
 import { DeleteButton, EditButton, BackButton } from "../shared/ui/index.js";
 import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
 import useErrors from "../../hooks/useErrors.js";
+import { LoadingSpinner } from "../shared/ui/index.js";
 
 const CompanyDetails = ({ setHeader = () => {} }) => {
   const [company, setCompany] = useState(null);
@@ -76,7 +77,7 @@ const CompanyDetails = ({ setHeader = () => {} }) => {
     });
   }, [companyId]);
 
-  if (loading) return <p>Loading…</p>;
+  if (loading) return <LoadingSpinner />;
   if (!company?._id) return <h3>Company Not Found</h3>;
 
   const applicationColumns = [
