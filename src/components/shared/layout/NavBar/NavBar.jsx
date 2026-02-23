@@ -1,13 +1,14 @@
 import { useContext } from "react";
-import { Link, useNavigate } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import { UserContext } from "../../../../contexts/UserContext.jsx";
 import "./NavBar.css";
 
-const NavBar = () => {
+const NavBar = ({ sidebarOpen, onMenuToggle }) => {
   const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = (e) => {
+    e.preventDefault();
     localStorage.removeItem("token");
     setUser(null);
     navigate("/");
@@ -15,25 +16,34 @@ const NavBar = () => {
 
   return (
     <nav className="navbar">
-      <Link to="/">Home</Link>
-      {user ? (
-        <>
-          <Link to="/companies">Companies</Link>
-          <Link to="/applications">Applications</Link>
+      <div className="navbar__left">
+        {user && (
+          <button
+            className={`navbar__hamburger${sidebarOpen ? " navbar__hamburger--open" : ""}`}
+            onClick={onMenuToggle}
+            aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+          >
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
+          </button>
+        )}
+        <NavLink to="/" className="navbar__brand">
+          <span className="navbar__brand-icon">⬡</span>
+          Job Application Tracker
+        </NavLink>
+      </div>
 
-          <Link to="/resumes">Resumes</Link>
-          <Link to="/cover-letters">Cover Letters</Link>
-
-          <a href="#" onClick={handleLogout}>
-            Logout
-          </a>
-        </>
-      ) : (
-        <>
-          <Link to="/login">Login</Link>
-          <Link to="/register">Register</Link>
-        </>
-      )}
+      <div className="navbar__right">
+        {user ? (
+          <button className="navbar__link" onClick={handleLogout}>Logout</button>
+        ) : (
+          <>
+            <NavLink to="/login"    className="navbar__link">Login</NavLink>
+            <NavLink to="/register" className="navbar__link navbar__link--cta">Register</NavLink>
+          </>
+        )}
+      </div>
     </nav>
   );
 };

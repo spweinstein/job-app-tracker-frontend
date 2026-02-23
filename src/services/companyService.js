@@ -1,14 +1,14 @@
 import { api } from "./api.js";
 
-export const getCompanies = async () => {
+export const getCompanies = async (params={}) => {
   try {
-    const { data } = await api.get("/companies");
+    const { data } = await api.get("/companies", { params });
     if (data.err) throw new Error(data.err);
     console.log(data);
 
     return data;
-  } catch (err) {
-    console.log(err);
+  } catch (e) {
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -18,7 +18,7 @@ export const getCompany = async (companyId) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -28,7 +28,7 @@ export const createCompany = async (formData) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -38,7 +38,7 @@ export const updateCompany = async (companyId, formData) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -48,6 +48,6 @@ export const deleteCompany = async (companyId) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };

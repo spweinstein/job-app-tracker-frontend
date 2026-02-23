@@ -6,30 +6,38 @@ import {
 import { useParams, useNavigate, Link } from "react-router";
 import { PageContainer } from "../shared/layout/index.js";
 import "../shared/views/RecordDetails/RecordDetails.css";
+import { DeleteButton } from "../shared/ui/index.js";
+import useErrors from "../../hooks/useErrors.js";
 
 const ApplicationDetails = () => {
   const [application, setApplication] = useState({ _id: null });
+  const {errors, addError, clearErrors} = useErrors();
   const { applicationId } = useParams();
   const navigate = useNavigate();
 
+  const fetchApplication = async () => {
+    try {
+      const res = await getApplication(applicationId);
+      setApplication(res);
+    } catch (e) {
+      addError(e.message);
+    }
+  };
+
   useEffect(() => {
-    const fetchApplication = async () => {
-      try {
-        const res = await getApplication(applicationId);
-        setApplication(res);
-      } catch (e) {
-        console.log(e);
-      }
-    };
     fetchApplication();
   }, [applicationId]);
 
   const handleDeleteClick = async () => {
-    await deleteApplication(applicationId);
-    navigate("/applications");
+    try {
+      await deleteApplication(applicationId);
+      navigate("/applications");
+    } catch (e) {
+      addError(e.message);
+    }
   };
 
-  if (application?._id === null) return <h3>Loading...</h3>;
+  // if (application?._id === null) return <h3>Loading...</h3>;
   if (!application?._id) return <h3>Application Not Found</h3>;
 
   return (
@@ -43,11 +51,10 @@ const ApplicationDetails = () => {
           >
             Edit
           </Link>
-          <button onClick={handleDeleteClick} className="btn btn-danger btn-sm">
-            Delete
-          </button>
+          <DeleteButton onClick={handleDeleteClick} />
         </>
       }
+      errors={errors}
     >
       <div className="card">
         <div className="card-header">

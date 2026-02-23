@@ -1,0 +1,76 @@
+/* ── Base layout shell ── */
+.app-layout {
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+/* ── Two-column layout when sidebar is present ── */
+.app-layout--has-sidebar {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  align-items: start;
+}
+
+/* ── Sidebar — desktop (always visible, in flow) ── */
+.left-sidebar {
+  grid-column: 1;
+  background: var(--bg-dark);
+  min-height: calc(100vh - var(--navbar-height));
+  position: sticky;
+  top: var(--navbar-height);
+  height: calc(100vh - var(--navbar-height));
+  overflow-y: auto;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  box-shadow: var(--shadow-sidebar);
+  /* custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-dark-raised) transparent;
+}
+
+/* ── Overlay backdrop — hidden on desktop ── */
+.sidebar-overlay {
+  display: none;
+}
+
+/* ── Mobile breakpoint ── */
+@media (max-width: 768px) {
+  /* Stack single-column on mobile */
+  .app-layout--has-sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  /* Sidebar becomes a fixed off-canvas drawer */
+  .left-sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    height: calc(100vh - var(--navbar-height));
+    width: var(--sidebar-width);
+    z-index: 150;
+    transform: translateX(-100%);
+    transition: transform var(--transition-slow);
+    grid-column: unset;
+  }
+
+  .left-sidebar--open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-sidebar), var(--shadow-glow);
+  }
+
+  /* Overlay backdrop */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: var(--navbar-height) 0 0 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 140;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-slow);
+  }
+
+  .sidebar-overlay--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

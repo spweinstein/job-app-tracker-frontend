@@ -4,3 +4,7 @@ export { default as TextAreaInput } from "./TextAreaInput.jsx";
 export { default as SelectInput } from "./SelectInput.jsx";
 export { default as DateInput } from "./DateInput.jsx";
 export { default as FormContainer } from "./FormContainer.jsx";
+export { default as RepeatableFieldGroup } from "./RepeatableFieldGroup.jsx";   
+export { default as FormRow } from "./FormRow.jsx";
+export { default as PasswordInput } from "./PasswordInput.jsx";
+export { default as SearchableSelect } from "./SearchableSelect.jsx";

@@ -1,47 +1,49 @@
-/* Base Badge Styles */
+/* ── Base Badge ── */
 .status,
 .priority {
-  padding: 4px 8px;
-  border-radius: var(--radius-xs);
-  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: var(--radius-lg);   /* pill shape */
+  font-size: 11px;
   font-weight: 600;
-  text-transform: capitalize;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
   width: fit-content;
+  display: inline-block;
 }
 
-/* Status-specific classes */
+/* ── Status badges ── */
 .status-applied {
-  background: #e3f2fd;
-  color: var(--info);
+  background: rgba(59,130,246,0.12);
+  color: var(--primary);
 }
 
 .status-interviewing {
-  background: #fff3e0;
-  color: var(--warning);
+  background: rgba(245,158,11,0.12);
+  color: #b45309;
 }
 
 .status-offer {
-  background: #e8f5e9;
-  color: var(--success);
+  background: rgba(16,185,129,0.12);
+  color: #047857;
 }
 
 .status-rejected {
-  background: #ffebee;
-  color: var(--danger);
+  background: rgba(239,68,68,0.12);
+  color: #b91c1c;
 }
 
-/* Priority-specific classes */
+/* ── Priority badges ── */
 .priority-low {
-  background: #f5f5f5;
+  background: var(--border-light);
   color: var(--text-light);
 }
 
 .priority-medium {
-  background: #fff9c4;
-  color: #f57f17;
+  background: rgba(245,158,11,0.12);
+  color: #b45309;
 }
 
 .priority-high {
-  background: #ffcdd2;
-  color: #c62828;
+  background: rgba(239,68,68,0.12);
+  color: #b91c1c;
 }

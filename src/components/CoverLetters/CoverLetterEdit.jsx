@@ -12,8 +12,11 @@ import {
   FormContainer,
   FormField,
 } from "../shared/forms/index.js";
+import { DeleteButton } from "../shared/ui/index.js";
+import useErrors from "../../hooks/useErrors.js";
 
 const CoverLetterEdit = () => {
+  const {errors, addError, clearErrors} = useErrors();
   const [formData, setFormData] = useState({
     name: "",
     body: "",
@@ -33,7 +36,7 @@ const CoverLetterEdit = () => {
           notes: notes ?? "",
         });
       } catch (e) {
-        console.log(e);
+        addError(e.message);
       }
     };
     fetchCoverLetter();
@@ -46,25 +49,30 @@ const CoverLetterEdit = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await updateCoverLetter(coverLetterId, formData);
+    try {
+      await updateCoverLetter(coverLetterId, formData);
+    } catch (e) {
+      addError(e.message);
+    }
     navigate(`/cover-letters/${coverLetterId}`);
   };
 
   const handleDeleteClick = async () => {
-    await deleteCoverLetter(coverLetterId);
-    navigate("/cover-letters");
+    try {
+      await deleteCoverLetter(coverLetterId);
+      navigate("/cover-letters");
+    } catch (e) {
+      addError(e.message);
+    }
   };
 
   return (
     <PageContainer
       title="Edit Cover Letter"
       actions={
-        <>
-          <button onClick={handleDeleteClick} className="btn btn-danger btn-sm">
-            Delete
-          </button>
-        </>
+        <DeleteButton onClick={handleDeleteClick} />
       }
+      errors={errors}
     >
       <FormContainer className="crud-form" onSubmit={handleSubmit}>
         <FormField label="Name">

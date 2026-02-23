@@ -1,12 +1,12 @@
 import { api } from "./api.js";
 
-export const getCoverLetters = async () => {
+export const getCoverLetters = async (params = {}) => {
   try {
-    const { data } = await api.get("/coverLetters");
+    const { data } = await api.get("/coverLetters", { params });
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -16,7 +16,7 @@ export const getCoverLetter = async (coverLetterId) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -26,7 +26,7 @@ export const createCoverLetter = async (formData) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -36,7 +36,7 @@ export const updateCoverLetter = async (coverLetterId, formData) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -44,6 +44,6 @@ export const deleteCoverLetter = async (coverLetterId) => {
   try {
     await api.delete(`/coverLetters/${coverLetterId}`);
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };

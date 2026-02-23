@@ -1,8 +1,8 @@
 /* Page Layout */
 .page-container {
   max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--space-xl);
+  margin: 0 1rem;
+  padding: var(--space-md);
 }
 
 /* Page Header */
@@ -12,7 +12,7 @@
   align-items: center;
   margin-bottom: var(--space-lg);
   background: var(--border-light);
-  padding: var(--space-lg);
+  padding: var(--space-md);
   border-radius: var(--radius-sm);
 }
 

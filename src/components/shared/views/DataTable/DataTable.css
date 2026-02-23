@@ -1,32 +1,33 @@
-/* Table Container - Define Grid Once */
+/* ── Table Container ── */
 .table-container {
-  border: var(--border);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
   background: var(--bg-white);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
   display: grid;
   --table-data-cols: 4;
 }
 
 /* Desktop: Grid layout */
-@media (min-width: 769px) {
-  .table-container {
-    grid-template-columns: repeat(var(--table-data-cols), minmax(0, 1fr)) auto;
-  }
+.table-container {
+  grid-template-columns: repeat(var(--table-data-cols), minmax(0, 1fr)) auto;
 }
 
-/* Table Header */
+/* ── Table Header ── */
 .table-header {
   display: contents;
 }
 
 .table-header > div {
-  background: var(--border-light);
+  background: var(--bg-dark);
   font-weight: 600;
   font-size: 11px;
-  color: var(--text-primary);
+  color: var(--text-on-dark-muted);
   padding: var(--space-md) var(--space-lg);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 /* Sortable header links */
@@ -34,7 +35,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  color: var(--text-primary);
+  color: var(--text-on-dark-muted);
   text-decoration: none;
   transition: var(--transition);
   cursor: pointer;
@@ -42,7 +43,7 @@
 }
 
 .table-header a.sort-header:hover {
-  color: var(--primary);
+  color: var(--text-on-dark);
 }
 
 .table-header a.sort-header[active] {
@@ -55,7 +56,7 @@
   color: var(--primary);
 }
 
-/* ensure that table body and rows participate in the grid system */
+/* ── Table Body ── */
 .table-body {
   display: contents;
 }
@@ -65,17 +66,29 @@
 }
 
 .table-row > div {
-  font-size: 12px;
-  padding: var(--space-md);
-  border-top: var(--border);
-  line-height: 1.4;
+  font-size: 13px;
+  padding: var(--space-sm) var(--space-md);
+  border-top: 1px solid var(--border-light);
+  line-height: 1.5;
+  color: var(--text-primary);
+  transition: background var(--transition), color var(--transition);
+
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* Hover: blue wash + left-edge accent on first cell */
 .table-row:hover > div {
   background: var(--primary-light);
 }
 
-/* Make the delete button participate in the flex layout with view/edit */
+.table-row:hover > div:first-child {
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+/* Action buttons cell */
 .table-row .actions {
   display: flex;
   gap: var(--space-xs);
@@ -87,39 +100,54 @@
   display: contents;
 }
 
+/* Pagination inside table */
 nav.pagination {
   grid-column: 1/-1;
   margin: 0 auto;
 }
 
-/* Mobile: Card layout */
-@media (max-width: 768px) {
+/* ── Mobile: Card layout ── */
+@media (max-width: 0px) {
   .table-container {
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
     border: none;
     background: transparent;
+    box-shadow: none;
   }
-  
+
   .table-header {
     display: none;
   }
-  
+
   .table-row {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--space-xs);
     padding: var(--space-md);
-    border: var(--border);
-    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
     background: var(--bg-white);
-  }
-  
-  .table-row:hover {
     box-shadow: var(--shadow-sm);
+    transition: var(--transition);
   }
-  
+
+  /* Reset desktop hover overrides */
+  .table-row:hover > div {
+    background: transparent;
+  }
+
+  .table-row:hover > div:first-child {
+    box-shadow: none;
+  }
+
+  /* Card hover: lift + left accent */
+  .table-row:hover {
+    box-shadow: var(--shadow-md);
+    border-left: 3px solid var(--primary);
+  }
+
   .table-row > div:not(.actions) {
     display: grid;
     grid-template-columns: 120px 1fr;
@@ -127,24 +155,24 @@ nav.pagination {
     padding: var(--space-xs) 0;
     border-top: none;
   }
-  
+
   .table-row > div:not(.actions)::before {
     content: attr(data-label);
     font-weight: 600;
     font-size: 11px;
-    color: var(--text-secondary);
+    color: var(--text-light);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  
+
   .table-row .actions {
     display: flex;
     gap: var(--space-sm);
     margin-top: var(--space-sm);
     padding-top: var(--space-sm);
-    border-top: var(--border);
+    border-top: 1px solid var(--border-light);
   }
-  
+
   nav.pagination {
     margin: var(--space-md) auto 0;
   }

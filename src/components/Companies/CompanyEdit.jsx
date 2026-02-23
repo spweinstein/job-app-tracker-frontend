@@ -5,10 +5,13 @@ import {
   deleteCompany,
 } from "../../services/companyService";
 import { useNavigate, useParams } from "react-router";
-import { FormField, TextInput, FormContainer } from "../shared/forms";
+import { FormRow, FormField, TextInput, FormContainer } from "../shared/forms";
 import { PageContainer } from "../shared/layout";
+import { DeleteButton } from "../shared/ui/index.js";
+import useErrors from "../../hooks/useErrors.js";
 
 const CompanyEdit = () => {
+  const {errors, addError, clearErrors} = useErrors();
   const [formData, setFormData] = useState({
     name: "",
     url: "",
@@ -25,7 +28,7 @@ const CompanyEdit = () => {
         const res = await getCompany(companyId);
         setFormData(res);
       } catch (e) {
-        console.log(e);
+        addError(e.message);
       }
     };
     fetchCompany();
@@ -38,37 +41,48 @@ const CompanyEdit = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await updateCompany(companyId, formData);
-    console.log(res);
-    navigate(`/companies/${companyId}`);
+    try {
+      const res = await updateCompany(companyId, formData);
+      if (res.error) {
+        addError(res.error);
+      }
+      navigate(`/companies/${companyId}`);
+    } catch (e) {
+      addError(e.message);
+    }
   };
 
   const handleDeleteClick = async () => {
-    await deleteCompany(companyId);
-    navigate("/companies");
+    try {
+      await deleteCompany(companyId);
+      navigate("/companies");
+    } catch (e) {
+      addError(e.message);
+    }
   };
 
   return (
     <PageContainer
       title="Edit Company"
       actions={
-        <button onClick={handleDeleteClick} className="btn btn-danger btn-sm">
-          Delete
-        </button>
+        <DeleteButton onClick={handleDeleteClick} />
       }
+      errors={errors}
     >
       <FormContainer className="crud-form" onSubmit={handleSubmit}>
-        <FormField label="Name">
-          <TextInput
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </FormField>
-        <FormField label="Website">
-          <TextInput name="url" value={formData.url} onChange={handleChange} />
-        </FormField>
+      <FormRow>
+          <FormField label="Name">
+            <TextInput
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+          </FormField>
+          <FormField label="Website">
+            <TextInput name="url" value={formData.url} onChange={handleChange} />
+          </FormField>
+        </FormRow>
         <FormField label="Description">
           <TextInput
             name="description"

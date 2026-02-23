@@ -3,10 +3,13 @@ import { createApplication } from "../../services/applicationService.js";
 import { getCompanies } from "../../services/companyService.js";
 import { getResumes } from "../../services/resumeService.js";
 import { useNavigate } from "react-router";
-import { FormField, TextInput, SelectInput, DateInput, FormContainer } from "../shared/forms";
+import { FormRow, FormField, TextInput, SelectInput, DateInput, FormContainer } from "../shared/forms";
 import { PageContainer } from "../shared/layout";
+import useErrors from "../../hooks/useErrors.js";
+import { SearchableSelect } from "../shared/forms";
 
 const ApplicationForm = () => {
+  const {errors, addError, clearErrors} = useErrors();
   const [formData, setFormData] = useState({
     title: "",
     company: "",
@@ -17,21 +20,18 @@ const ApplicationForm = () => {
     appliedAt: new Date().toISOString().split("T")[0],
     url: "",
   });
-  const [companies, setCompanies] = useState([]);
-  const [resumes, setResumes] = useState([]);
+  
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchOptions = async () => {
-      const [companiesRes, resumesRes] = await Promise.all([
-        getCompanies(),
-        getResumes(),
-      ]);
-      setCompanies(companiesRes ?? []);
-      setResumes(resumesRes ?? []);
-    };
-    fetchOptions();
-  }, []);
+  const loadCompanies = async (q) => {
+    const res = await getCompanies({ q, limit: 20, sort: "name", sortDir: "asc" });
+    return res.data.map((c) => ({ label: c.name, value: c._id }));
+  };
+
+  const loadResumes = async (q) => {
+    const res = await getResumes({ q, limit: 20, sort: "name", sortDir: "asc" });
+    return res.data.map((r) => ({ label: r.name, value: r._id }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,78 +40,90 @@ const ApplicationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await createApplication(formData);
-    navigate("/applications");
+    try {
+      await createApplication({...formData, company: formData.company?._id ?? formData.company, resume: formData.resume?._id ?? formData.resume});
+      navigate("/applications");
+    } catch (e) {
+      addError(e.message);
+    }
   };
 
   return (
-    <PageContainer title="New Application">
+    <PageContainer title="New Application" errors={errors}>
       <FormContainer onSubmit={handleSubmit}>
-        <FormField label="Company">
-          <SelectInput
-            name="company"
-            value={formData.company}
-            onChange={handleChange}
-            optionLabels={companies.map((c) => c.name)}
-            optionValues={companies.map((c) => c._id)}
-            required
-          />
-        </FormField>
+        <FormRow>
+          <FormField label="Company">
+            <SearchableSelect
+              name="company"
+              value={formData.company}
+              onChange={handleChange}
+              loadOptions={loadCompanies}
+              required
+            />
+          </FormField>
+          <FormField label="Title">
+            <TextInput
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+            />
+          
+          </FormField>
+        </FormRow>
+
+        <FormRow>
+          <FormField label="Status">
+            <SelectInput
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              optionLabels={["Applied", "Interviewing", "Offer", "Rejected"]}
+              optionValues={["Applied", "Interviewing", "Offer", "Rejected"]}
+              required
+            />
+          </FormField>
+
+          <FormField label="Priority">
+            <SelectInput
+              name="priority"
+              value={formData.priority}
+              onChange={handleChange}
+              optionLabels={["Low", "Medium", "High"]}
+              optionValues={["Low", "Medium", "High"]}
+            />
+          </FormField>
+          <FormField label="Source">
+            <SelectInput
+              name="source"
+              value={formData.source}
+              onChange={handleChange}
+              optionLabels={["LinkedIn", "Indeed", "Company Site", "Networking"]}
+              optionValues={["LinkedIn", "Indeed", "Company Site", "Networking"]}
+            />
+          </FormField>
+        </FormRow>
+
+        <FormRow>
+          <FormField label="Link">
+            <TextInput name="url" value={formData.url} onChange={handleChange} />
+          </FormField>
+          <FormField label="Applied At">
+            <DateInput
+              name="appliedAt"
+              value={formData.appliedAt}
+              onChange={handleChange}
+            />
+          </FormField>
+        </FormRow>
+
         <FormField label="Resume">
-          <SelectInput
+          <SearchableSelect
             name="resume"
             value={formData.resume}
             onChange={handleChange}
-            optionLabels={resumes.map((r) => r.name)}
-            optionValues={resumes.map((r) => r._id)}
+            loadOptions={loadResumes}
             required
-          />
-        </FormField>
-        <FormField label="Title">
-          <TextInput
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-          />
-        </FormField>
-        <FormField label="Status">
-          <SelectInput
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            optionLabels={["Applied", "Interviewing", "Offer", "Rejected"]}
-            optionValues={["Applied", "Interviewing", "Offer", "Rejected"]}
-            required
-          />
-        </FormField>
-        <FormField label="Source">
-          <SelectInput
-            name="source"
-            value={formData.source}
-            onChange={handleChange}
-            optionLabels={["LinkedIn", "Indeed", "Company Site", "Networking"]}
-            optionValues={["LinkedIn", "Indeed", "Company Site", "Networking"]}
-          />
-        </FormField>
-
-        <FormField label="Priority">
-          <SelectInput
-            name="priority"
-            value={formData.priority}
-            onChange={handleChange}
-            optionLabels={["Low", "Medium", "High"]}
-            optionValues={["Low", "Medium", "High"]}
-          />
-        </FormField>
-        <FormField label="Link">
-          <TextInput name="url" value={formData.url} onChange={handleChange} />
-        </FormField>
-        <FormField label="Applied At">
-          <DateInput
-            name="appliedAt"
-            value={formData.appliedAt}
-            onChange={handleChange}
           />
         </FormField>
         <div className="actions">

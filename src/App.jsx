@@ -8,21 +8,31 @@ import NavBar from "./components/shared/layout/NavBar/NavBar.jsx";
 import LoginForm from "./components/LoginForm.jsx";
 import RegisterForm from "./components/RegisterForm.jsx";
 import CoverLetterPage from "./components/CoverLetters/CoverLetterPage.jsx";
+import AppLayout from "./components/shared/layout/AppLayout/AppLayout.jsx";
+import "./components/shared/list/ListControls.css";
+
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => setSidebarOpen((o) => !o);
+  const closeSidebar  = () => setSidebarOpen(false);
 
   return (
     <>
-      <NavBar />
-      {/* <h1>Job Application Tracker</h1> */}
+      <NavBar sidebarOpen={sidebarOpen} onMenuToggle={toggleSidebar} />
       <Routes>
-        <Route path="/" element={<h1>Landing</h1>} />
-        <Route path="/companies/*" element={<CompanyPage />} />
-        <Route path="/applications/*" element={<ApplicationPage />} />
-        <Route path="/resumes/*" element={<ResumePage />} />
-        <Route path="/cover-letters/*" element={<CoverLetterPage />} />
-        <Route path="/login" element={<LoginForm />} />
+        <Route
+          path="/"
+          element={<AppLayout sidebarOpen={sidebarOpen} onSidebarClose={closeSidebar} />}
+        >
+          <Route index element={<h1>Landing</h1>} />
+          <Route path="/companies/*"     element={<CompanyPage />} />
+          <Route path="/applications/*"  element={<ApplicationPage />} />
+          <Route path="/resumes/*"       element={<ResumePage />} />
+          <Route path="/cover-letters/*" element={<CoverLetterPage />} />
+        </Route>
+        <Route path="/login"    element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
       </Routes>
     </>

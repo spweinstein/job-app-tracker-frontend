@@ -1,90 +1,58 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router";
-import { register } from "../services/authService";
+import { register as registerUser } from "../services/authService";
 import { UserContext } from "../contexts/UserContext.jsx";
+import { PageContainer } from "./shared/layout/index.js";
+import { FormContainer, FormField, TextInput, PasswordInput } from "./shared/forms/index.js";
+import useErrors from "../hooks/useErrors.js";
+import useForm from "../hooks/useForm.js";
 
 const RegisterForm = () => {
-  const [message, setMessage] = useState("");
-  const [formData, setFormData] = useState({
+  const {errors, addError, clearErrors} = useErrors();
+  const navigate = useNavigate();
+  const { setUser } = useContext(UserContext);
+  
+  const initialState = {
     username: "",
     password: "",
     passwordConf: "",
-  });
-
-  const navigate = useNavigate();
-
-  const { setUser } = useContext(UserContext);
-
-  const { username, password, passwordConf } = formData;
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setMessage("");
-    setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
   };
 
-  const handleSubmit = async (evt) => {
-    evt.preventDefault();
-    try {
-      const newUser = await register(formData);
-      console.log(newUser);
-      setUser(newUser);
-      navigate("/");
-    } catch (err) {
-      setMessage(err.message);
-    }
+  const onSubmit = async (formData) => {
+    const newUser = await registerUser(formData);
+    setUser(newUser);
+    navigate("/");
   };
+
+  const { register, formData, setFormData, fieldErrors, handleChange, handleSubmit, formErrors } = useForm(initialState, onSubmit);
 
   const isFormInvalid = () => {
-    return !(username && password && password === passwordConf);
+    return !(formData.username && formData.password && formData.password === formData.passwordConf);
   };
 
   return (
-    <main>
-      <h1>Sign Up</h1>
-      <p>{message}</p>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            name="username"
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            name="password"
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="confirm">Confirm Password:</label>
-          <input
-            type="password"
-            id="confirm"
-            value={passwordConf}
-            name="passwordConf"
-            onChange={handleChange}
-            required
-          />
-        </div>
+    <PageContainer title="Sign Up" errors={errors}>
+      <FormContainer onSubmit={handleSubmit} errors={formErrors}>
+        <FormField label="Username">
+          {/* <TextInput name="username" value={username} onChange={handleChange} required /> */}
+          <TextInput {...register("username", (value) => value.length > 0 ? undefined : "Username is required")} />
+        </FormField>
+        <FormField label="Password">
+          {/* <PasswordInput name="password" value={password} onChange={handleChange} required /> */}
+          <PasswordInput {...register("password", (value) => value.length > 0 ? undefined : "Password is required")} />
+        </FormField>
+        <FormField label="Confirm Password">
+          {/* <PasswordInput name="passwordConf" value={passwordConf} onChange={handleChange} required /> */}
+          <PasswordInput {...register("passwordConf", (value) => value.length > 0 ? undefined : "Password confirmation is required")} />
+        </FormField>
         <div>
           <button type="submit" disabled={isFormInvalid()}>
             Sign Up
           </button>
           <button onClick={() => navigate("/")}>Cancel</button>
         </div>
-      </form>
-    </main>
+      </FormContainer>
+    </PageContainer>
   );
 };
 

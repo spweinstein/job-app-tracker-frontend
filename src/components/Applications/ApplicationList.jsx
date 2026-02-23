@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
   deleteApplication,
   getApplications,
@@ -6,24 +5,36 @@ import {
 import { Link, useNavigate } from "react-router";
 import { PageContainer } from "../shared/layout/index.js";
 import { DataTable } from "../shared/views/index.js";
+import { DeleteButton, EditButton } from "../shared/ui/index.js";
+import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
+import { ListSearch } from "../shared/list/ListSearch.jsx";
+import { ListPagination } from "../shared/list/ListPagination.jsx";
 
 const ApplicationList = () => {
-  const [applications, setApplications] = useState([]);
   const navigate = useNavigate();
-  const fetchApplications = async () => {
-    const res = await getApplications();
-    setApplications(res ?? []);
-  };
-  useEffect(() => {
-    fetchApplications();
-  }, []);
+
+  const {
+    data,
+    total,
+    totalPages,
+    loading,
+    errors,
+    query,
+    setQuery,
+    sortField,
+    sortDir,
+    toggleSort,
+    page,
+    setPage,
+    refresh,
+  } = usePaginatedQuery(getApplications, { defaultSort: "updatedAt" });
 
   const handleDelete = async (applicationId) => {
     try {
       await deleteApplication(applicationId);
-      fetchApplications();
+      refresh();
     } catch (error) {
-      console.error(`[handleDelete error]: ${error.message}`);
+      // errors surfaced via hook
     }
   };
 
@@ -31,9 +42,23 @@ const ApplicationList = () => {
     {
       key: "title",
       label: "Job Title",
+      sortable: true,
       render: (row) => (
         <Link to={`/applications/${row._id}`}>{row.title || "Untitled"}</Link>
       ),
+    },
+    {
+      key: "company",
+      label: "Company",
+      render: (row) =>
+        row?.company?._id ? (
+          <Link to={`/companies/${row.company._id}`}>
+            {row.company?.name || "Untitled"}
+          </Link>
+        ) : (
+          <span>{row.company?.name || "---"}</span>
+        ),
+      minWidth: 400,
     },
     {
       key: "status",
@@ -43,6 +68,9 @@ const ApplicationList = () => {
           {row.status}
         </span>
       ),
+
+      minWidth: 400,
+
     },
     {
       key: "priority",
@@ -52,30 +80,29 @@ const ApplicationList = () => {
           {row.priority}
         </span>
       ),
+      minWidth: 600,
     },
     {
       key: "source",
       label: "Source",
       render: (row) => row.source || "-",
+      minWidth: 800,
+    },
+    {
+      key: "updatedAt",
+      label: "Last Updated",
+      sortable: true,
+      render: (row) =>
+        row.updatedAt ? new Date(row.updatedAt).toLocaleDateString() : "-",
     },
     {
       key: "actions",
       label: "Actions",
       isActions: true,
-      render: (row) => (
+      render: (row, {tableWidth}) => (
         <div className="actions">
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={() => navigate(`/applications/${row._id}/edit`)}
-          >
-            Edit
-          </button>
-          <button
-            className="btn btn-sm btn-warning"
-            onClick={() => handleDelete(row._id)}
-          >
-            Delete
-          </button>
+          <EditButton onClick={() => navigate(`/applications/${row._id}/edit`)} size={tableWidth < 500 ? "icon" : "xs"} />
+          <DeleteButton onClick={() => handleDelete(row._id)} size={tableWidth < 500 ? "icon" : "xs"} />
         </div>
       ),
     },
@@ -89,12 +116,23 @@ const ApplicationList = () => {
           Create
         </Link>
       }
+      errors={errors}
     >
+      <ListSearch
+        value={query}
+        onChange={setQuery}
+        placeholder="Search applications…"
+        total={total}
+      />
       <DataTable
         columns={columns}
-        data={applications}
-        emptyState={<p>No applications found.</p>}
+        data={data}
+        sortField={sortField}
+        sortDir={sortDir}
+        onSort={toggleSort}
+        emptyState={loading ? <p>Loading…</p> : <p>No applications found.</p>}
       />
+      <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </PageContainer>
   );
 };

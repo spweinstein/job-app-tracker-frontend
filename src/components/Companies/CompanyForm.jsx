@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { createCompany } from "../../services/companyService";
 import { useNavigate } from "react-router";
-import { FormField, TextInput, FormContainer } from "../shared/forms";
+import { FormRow, FormField, TextInput, FormContainer } from "../shared/forms";
 import { PageContainer } from "../shared/layout";
+import useErrors from "../../hooks/useErrors.js";
+
 const CompanyForm = () => {
+  const {errors, addError, clearErrors} = useErrors();
   const [formData, setFormData] = useState({
     name: "",
     url: "",
@@ -20,25 +23,31 @@ const CompanyForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await createCompany(formData);
-    console.log(res);
-    navigate("/companies");
+    try {
+      console.log(formData);
+      const res = await createCompany(formData);
+      navigate("/companies");
+    } catch (e) {
+      addError(e.message);
+    }
   };
 
   return (
-    <PageContainer title="New Company">
+    <PageContainer title="New Company" errors={errors}>
       <FormContainer className="crud-form" onSubmit={handleSubmit}>
-        <FormField label="Name">
-          <TextInput
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </FormField>
-        <FormField label="Website">
-          <TextInput name="url" value={formData.url} onChange={handleChange} />
-        </FormField>
+        <FormRow>
+          <FormField label="Name">
+            <TextInput
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+          </FormField>
+          <FormField label="Website">
+            <TextInput name="url" value={formData.url} onChange={handleChange} />
+          </FormField>
+        </FormRow>
         <FormField label="Description">
           <TextInput
             name="description"

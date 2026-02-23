@@ -3,19 +3,20 @@ import { getCompanies, deleteCompany } from "../../services/companyService.js";
 import { Link, useNavigate } from "react-router";
 import { PageContainer } from "../shared/layout/index.js";
 import { DataTable } from "../shared/views/index.js";
+import { DeleteButton, EditButton } from "../shared/ui/index.js";
+import useErrors from "../../hooks/useErrors.js";
+import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
+import { TextInput } from "../shared/forms/index.js";
+import { ListSearch } from "../shared/list/ListSearch.jsx";
+import { ListPagination } from "../shared/list/ListPagination.jsx";
 
 const CompanyList = () => {
-  const [companies, setCompanies] = useState([]);
   const navigate = useNavigate();
 
-  const fetchCompanies = async () => {
-    const companies = await getCompanies();
-    setCompanies(companies);
-  };
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
-
+  // Pagination logic (will become usePaginatedQuery hook)
+  const {errors, addError, clearErrors} = useErrors();
+  const {data, total, totalPages, loading, query, setQuery, sortField, sortDir, toggleSort, page, setPage, refresh} = usePaginatedQuery(getCompanies);
+  
   const handleEdit = (companyId) => {
     navigate(`/companies/${companyId}/edit`);
   };
@@ -23,13 +24,13 @@ const CompanyList = () => {
   const handleDelete = async (companyId) => {
     try {
       const deletedCompany = await deleteCompany(companyId);
-      fetchCompanies();
+      refresh();
     } catch (error) {
-      console.error(`[handleDelete error]: ${error.message}`);
+      addError(error.message);
     }
   };
 
-  if (!companies)
+  if (!data)
     return (
       <>
         <h2>Companies</h2>
@@ -44,51 +45,55 @@ const CompanyList = () => {
       render: (row) => (
         <Link to={`/companies/${row._id}`}>{row.name || "Untitled"}</Link>
       ),
+      sortable: true,
     },
     {
       key: "updatedAt",
       label: "Last Updated",
       render: (row) =>
         row.updatedAt ? new Date(row.updatedAt).toLocaleDateString() : "-",
+      sortable: true,
     },
     {
       key: "actions",
       label: "Actions",
       isActions: true,
-      render: (row) => (
+      render: (row, {tableWidth}) => (
         <div className="actions">
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={() => navigate(`/companies/${row._id}/edit`)}
-          >
-            Edit
-          </button>
-          <button
-            className="btn btn-sm btn-warning"
-            onClick={() => handleDelete(row._id)}
-          >
-            Delete
-          </button>
+          <EditButton onClick={() => navigate(`/companies/${row._id}/edit`)} size={tableWidth < 500 ? "icon" : "xs"} />
+          <DeleteButton onClick={() => handleDelete(row._id)} size={tableWidth < 500 ? "icon" : "xs"} />
         </div>
       ),
     },
   ];
 
   return (
-    <PageContainer
-      title="Companies"
-      actions={
-        <Link to="/companies/new" className="btn btn-lg btn-primary">
-          Create
-        </Link>
-      }
-    >
-      <DataTable
-        columns={columns}
-        data={companies}
-        emptyState={<p>No companies found</p>}
-      />
-    </PageContainer>
+      <PageContainer
+        title="Companies"
+        actions={
+          <Link to="/companies/new" className="btn btn-lg btn-primary">
+            Create
+          </Link>
+        }
+        errors={errors}
+      >
+        <ListSearch
+          value={query}
+          onChange={setQuery}
+          placeholder="Search companies…"
+          total={total}
+        />
+        <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+
+        <DataTable
+          columns={columns}
+          data={data}
+          sortField={sortField}
+          sortDir={sortDir}
+          onSort={toggleSort}
+          emptyState={loading ? <p>Loading…</p> : <p>No companies found.</p>}
+        />
+      </PageContainer>
   );
 };
 

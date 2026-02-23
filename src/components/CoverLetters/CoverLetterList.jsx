@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
   getCoverLetters,
   deleteCoverLetter,
@@ -6,26 +5,36 @@ import {
 import { Link, useNavigate } from "react-router";
 import { PageContainer } from "../shared/layout/index.js";
 import { DataTable } from "../shared/views/index.js";
+import { DeleteButton, EditButton } from "../shared/ui/index.js";
+import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
+import { ListSearch } from "../shared/list/ListSearch.jsx";
+import { ListPagination } from "../shared/list/ListPagination.jsx";
 
 const CoverLetterList = () => {
-  const [coverLetters, setCoverLetters] = useState([]);
   const navigate = useNavigate();
 
-  const fetchCoverLetters = async () => {
-    const res = await getCoverLetters();
-    setCoverLetters(res);
-  };
-
-  useEffect(() => {
-    fetchCoverLetters();
-  }, []);
+  const {
+    data,
+    total,
+    totalPages,
+    loading,
+    errors,
+    query,
+    setQuery,
+    sortField,
+    sortDir,
+    toggleSort,
+    page,
+    setPage,
+    refresh,
+  } = usePaginatedQuery(getCoverLetters);
 
   const handleDelete = async (coverLetterId) => {
     try {
       await deleteCoverLetter(coverLetterId);
-      fetchCoverLetters();
+      refresh();
     } catch (error) {
-      console.error(`[handleDelete error]: ${error.message}`);
+      // errors surfaced via hook
     }
   };
 
@@ -33,13 +42,36 @@ const CoverLetterList = () => {
     {
       key: "name",
       label: "Name",
+      sortable: true,
       render: (row) => (
         <Link to={`/cover-letters/${row._id}`}>{row.name || "Untitled"}</Link>
       ),
     },
     {
+      key: "parent",
+      label: "Parent",
+      render: (row) =>
+        row.parent ? (
+          <Link to={`/cover-letters/${row.parent._id}`}>
+            {row.parent.name || "Untitled"}
+          </Link>
+        ) : (
+          "---"
+        ),
+      minWidth: 400,
+    },
+
+    {
+      key: "version",
+      label: "Version",
+      render: (row) =>
+        row.version || "0",
+      minWidth: 600,
+    },
+    {
       key: "updatedAt",
       label: "Last Updated",
+      sortable: true,
       render: (row) =>
         row.updatedAt ? new Date(row.updatedAt).toLocaleDateString() : "-",
     },
@@ -47,20 +79,10 @@ const CoverLetterList = () => {
       key: "actions",
       label: "Actions",
       isActions: true,
-      render: (row) => (
+      render: (row, {tableWidth}) => (
         <div className="actions">
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={() => navigate(`/cover-letters/${row._id}/edit`)}
-          >
-            Edit
-          </button>
-          <button
-            className="btn btn-sm btn-warning"
-            onClick={() => handleDelete(row._id)}
-          >
-            Delete
-          </button>
+          <EditButton onClick={() => navigate(`/cover-letters/${row._id}/edit`)} size={tableWidth < 500 ? "icon" : "xs"} />
+          <DeleteButton onClick={() => handleDelete(row._id)} size={tableWidth < 500 ? "icon" : "xs"} />
         </div>
       ),
     },
@@ -74,12 +96,23 @@ const CoverLetterList = () => {
           Create
         </Link>
       }
+      errors={errors}
     >
+      <ListSearch
+        value={query}
+        onChange={setQuery}
+        placeholder="Search cover letters…"
+        total={total}
+      />
       <DataTable
         columns={columns}
-        data={coverLetters}
-        emptyState={<p>No cover letters found.</p>}
+        data={data}
+        sortField={sortField}
+        sortDir={sortDir}
+        onSort={toggleSort}
+        emptyState={loading ? <p>Loading…</p> : <p>No cover letters found.</p>}
       />
+      <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </PageContainer>
   );
 };

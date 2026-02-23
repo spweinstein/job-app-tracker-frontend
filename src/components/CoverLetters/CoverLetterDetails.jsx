@@ -6,8 +6,13 @@ import {
 import { useParams, useNavigate, Link } from "react-router";
 import { PageContainer } from "../shared/layout/index.js";
 import "../shared/views/RecordDetails/RecordDetails.css";
+import { DeleteButton } from "../shared/ui/index.js";
+import useErrors from "../../hooks/useErrors.js";
+import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
+
 const CoverLetterDetails = () => {
   const [coverLetter, setCoverLetter] = useState({ _id: null });
+  const {errors, addError, clearErrors} = useErrors();
   const { coverLetterId } = useParams();
   const navigate = useNavigate();
 
@@ -17,15 +22,19 @@ const CoverLetterDetails = () => {
         const res = await getCoverLetter(coverLetterId);
         setCoverLetter(res);
       } catch (e) {
-        console.log(e);
+        addError(e.message);
       }
     };
     fetchCoverLetter();
   }, [coverLetterId]);
 
   const handleDeleteClick = async () => {
-    await deleteCoverLetter(coverLetterId);
-    navigate("/cover-letters");
+    try {
+      await deleteCoverLetter(coverLetterId);
+      navigate("/cover-letters");
+    } catch (e) {
+      addError(e.message);
+    }
   };
 
   if (coverLetter?._id === null) return <h3>Loading...</h3>;
@@ -42,17 +51,19 @@ const CoverLetterDetails = () => {
           >
             Edit
           </Link>
-          <button onClick={handleDeleteClick} className="btn btn-danger btn-sm">
-            Delete
-          </button>
+          <DeleteButton onClick={handleDeleteClick} />
         </>
       }
+      errors={errors}
     >
-      <div>
-        <h3>{coverLetter.name}</h3>
-        {coverLetter.body && <p>{coverLetter.body}</p>}
-        {coverLetter.notes && <p>Notes: {coverLetter.notes}</p>}
+      <div className="card">
+        <div className="card-header">
+          <h3>{coverLetter.name}          <span className="cover-letter-version" style={{float: "right", opacity: 0.7}}> v{coverLetter.version || "0"}</span>
+          </h3>
+        </div>
+        
       </div>
+      <DocumentLineagePanel document={coverLetter} basePath="/cover-letters" />
     </PageContainer>
   );
 };

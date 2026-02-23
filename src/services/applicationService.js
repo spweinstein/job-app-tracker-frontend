@@ -1,12 +1,12 @@
 import { api } from "./api.js";
 
-export const getApplications = async () => {
+export const getApplications = async (params = {}) => {
   try {
-    const { data } = await api.get("/applications");
+    const { data } = await api.get("/applications", { params });
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -16,7 +16,7 @@ export const getApplication = async (applicationId) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -26,7 +26,7 @@ export const createApplication = async (formData) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -36,7 +36,7 @@ export const updateApplication = async (applicationId, formData) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -44,6 +44,6 @@ export const deleteApplication = async (applicationId) => {
   try {
     await api.delete(`/applications/${applicationId}`);
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };

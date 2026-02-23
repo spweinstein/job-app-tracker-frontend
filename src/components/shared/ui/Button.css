@@ -1,67 +1,100 @@
-/* Base Button Styles */
+/* ── Base Button Styles ── */
 .btn,
 button {
   font: inherit;
   border-radius: var(--radius-sm);
-  border: 2px solid;
+  border: 1px solid transparent;
   cursor: pointer;
   font-weight: 600;
+  font-size: 13px;
   transition: var(--transition);
   white-space: nowrap;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-white);
+  background: transparent;
 }
 
-/* Primary Button (default) */
+/* ── Primary (filled) ── */
 .btn-primary,
 button[type="submit"]:not(.btn-delete):not(.btn-danger) {
-  color: var(--primary);
+  background: var(--primary);
+  color: #fff;
   border-color: var(--primary);
+  box-shadow: 0 1px 3px rgba(59,130,246,0.25);
 }
 
 .btn-primary:hover,
-.btn-edit:hover,
 button[type="submit"]:not(.btn-delete):not(.btn-danger):hover {
-  background: var(--primary);
-  color: white;
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-/* Danger/Delete Button */
+/* ── Edit (ghost blue) ── */
+.btn-edit {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: transparent;
+}
+
+.btn-edit:hover {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* ── Danger / Delete ── */
 .btn-danger,
 .btn-delete {
   color: var(--danger);
   border-color: var(--danger);
+  background: transparent;
 }
 
 .btn-danger:hover,
 .btn-delete:hover {
   background: var(--danger);
-  color: white;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.15);
 }
 
-/* Warning Button */
+/* ── Warning / View ── */
 .btn-warning {
   color: var(--warning);
   border-color: var(--warning);
+  background: transparent;
 }
 
 .btn-warning:hover,
 .btn-view:hover {
   background: var(--warning);
-  color: white;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
 }
 
-/* Button Sizes */
+/* ── Sizes ── */
+
+.btn-xs {
+  padding: var(--space-xxs) var(--space-xs);
+  font-size: 12px;
+  min-width: 52px;
+}
+
 .btn-sm {
   padding: var(--space-xs) var(--space-sm);
   font-size: 12px;
-  min-width: 60px;
+  min-width: 52px;
+}
+
+.btn-md {
+  padding: var(--space-sm) var(--space-md);
+  font-size: 12px;
+  min-width: 52px;
 }
 
 .btn-lg {
-  padding: 12px 20px;
-  font-size: 16px;
+  padding: var(--space-sm) var(--space-xl);
+  font-size: 15px;
 }

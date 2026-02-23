@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import { getCompany, deleteCompany } from "../../services/companyService.js";
+import { deleteApplication } from "../../services/applicationService.js";
 import { useParams, useNavigate, Link } from "react-router";
 import { PageContainer } from "../shared/layout";
 import { DataTable } from "../shared/views/index.js";
+import { DeleteButton } from "../shared/ui/index.js";
 import "../shared/views/RecordDetails/RecordDetails.css";
+import useErrors from "../../hooks/useErrors.js";
 
 const CompanyDetails = () => {
   const [company, setCompany] = useState({ _id: null });
+  const {errors, addError, clearErrors} = useErrors();
   const [relatedApplications, setRelatedApplications] = useState([]);
   const { companyId } = useParams();
   const navigate = useNavigate();
@@ -17,31 +21,46 @@ const CompanyDetails = () => {
         const res = await getCompany(companyId);
         setCompany(res);
       } catch (e) {
-        console.log(e);
+        addError(e.message);
       }
     };
     fetchCompany();
   }, [companyId]);
 
+  const fetchRelatedApplications = async () => {
+    try {
+      const { api } = await import("../../services/api.js");
+      const { data } = await api.get(`/applications?company=${companyId}`);
+      setRelatedApplications(data.data || []);
+    } catch (e) {
+      addError(e.message);
+    }
+  };
+
   useEffect(() => {
     // Fetch related applications for this company
-    const fetchRelatedApplications = async () => {
-      try {
-        const { api } = await import("../../services/api.js");
-        const { data } = await api.get(`/applications?company=${companyId}`);
-        setRelatedApplications(data || []);
-      } catch (e) {
-        console.log(e);
-      }
-    };
+
     if (companyId) {
       fetchRelatedApplications();
     }
   }, [companyId]);
 
-  const handleDeleteClick = async () => {
-    await deleteCompany(companyId);
-    navigate("/companies");
+  const handleDeleteCompany = async () => {
+    try {
+      await deleteCompany(companyId);
+      navigate("/companies");
+    } catch (e) {
+      addError(e.message);
+    }
+  };
+
+  const handleDeleteApplication = async (applicationId) => {
+    try {
+      await deleteApplication(applicationId);
+    } catch (e) {
+      addError(e.message);
+    }
+    fetchRelatedApplications();
   };
 
   if (company?._id === null) {
@@ -56,9 +75,9 @@ const CompanyDetails = () => {
 
   const applicationColumns = [
     {
-      key: "position",
+      key: "title",
       label: "Position",
-      render: (row) => row.position || "-",
+      render: (row) => row.title || "-",
     },
     {
       key: "status",
@@ -75,7 +94,7 @@ const CompanyDetails = () => {
       key: "appliedDate",
       label: "Applied",
       render: (row) =>
-        row.appliedDate ? new Date(row.appliedDate).toLocaleDateString() : "-",
+        row.appliedAt ? new Date(row.appliedAt).toLocaleDateString() : "-",
     },
     {
       key: "actions",
@@ -89,12 +108,7 @@ const CompanyDetails = () => {
           >
             View
           </button>
-          <button
-            className="btn btn-sm btn-warning"
-            onClick={() => handleDelete(row._id)}
-          >
-            Delete
-          </button>
+          <DeleteButton onClick={() => handleDeleteApplication(row._id)} />
         </div>
       ),
     },
@@ -111,11 +125,10 @@ const CompanyDetails = () => {
           >
             Edit
           </Link>
-          <button onClick={handleDeleteClick} className="btn btn-danger btn-sm">
-            Delete
-          </button>
+          <DeleteButton onClick={handleDeleteCompany} />
         </>
       }
+      errors={errors}
     >
       <div className="details-container">
         <div className="card">

@@ -1,12 +1,12 @@
 import { api } from "./api.js";
 
-export const getResumes = async () => {
+export const getResumes = async (params = {}) => {
   try {
-    const { data } = await api.get("/resumes");
+    const { data } = await api.get("/resumes", { params });
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -16,7 +16,7 @@ export const getResume = async (resumeId) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -26,7 +26,7 @@ export const createResume = async (formData) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -36,7 +36,7 @@ export const updateResume = async (resumeId, formData) => {
     if (data.err) throw new Error(data.err);
     return data;
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
 
@@ -44,6 +44,6 @@ export const deleteResume = async (resumeId) => {
   try {
     await api.delete(`/resumes/${resumeId}`);
   } catch (e) {
-    console.log(e);
+    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
   }
 };
