@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { getCompany, deleteCompany } from "../../services/companyService.js";
-import { deleteApplication } from "../../services/applicationService.js";
+import { deleteApplication, getApplications } from "../../services/applicationService.js";
 import { useParams, useNavigate, Link } from "react-router";
 import { PageContainer } from "../shared/layout";
 import { DataTable } from "../shared/views/index.js";
-import { DeleteButton } from "../shared/ui/index.js";
-import "../shared/views/RecordDetails/RecordDetails.css";
+import { DeleteButton, EditButton } from "../shared/ui/index.js";
+import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
 import useErrors from "../../hooks/useErrors.js";
 
 const CompanyDetails = () => {
-  const [company, setCompany] = useState({ _id: null });
+  const [company, setCompany] = useState(null);
+  const [loading, setLoading] = useState(true);
   const {errors, addError, clearErrors} = useErrors();
   const [relatedApplications, setRelatedApplications] = useState([]);
   const { companyId } = useParams();
@@ -22,6 +23,8 @@ const CompanyDetails = () => {
         setCompany(res);
       } catch (e) {
         addError(e.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchCompany();
@@ -38,8 +41,6 @@ const CompanyDetails = () => {
   };
 
   useEffect(() => {
-    // Fetch related applications for this company
-
     if (companyId) {
       fetchRelatedApplications();
     }
@@ -63,52 +64,58 @@ const CompanyDetails = () => {
     fetchRelatedApplications();
   };
 
-  if (company?._id === null) {
-    return <h3>Loading...</h3>;
-  }
-
-  if (!company?.name) {
-    return <h3>Company Not Found</h3>;
-  }
-
-  const actions = [,];
+  if (loading) return <p>Loading…</p>;
+  if (!company?._id) return <h3>Company Not Found</h3>;
 
   const applicationColumns = [
     {
       key: "title",
-      label: "Position",
-      render: (row) => row.title || "-",
+      label: "Job Title",
+      sortable: true,
+      render: (row) => (
+        <Link to={`/applications/${row._id}`}>{row.title || "Untitled"}</Link>
+      ),
     },
     {
       key: "status",
       label: "Status",
       render: (row) => (
-        <span
-          className={`status-badge status-badge--${row.status?.toLowerCase()}`}
-        >
-          {row.status || "-"}
+        <span className={`status status-${row.status?.toLowerCase()}`}>
+          {row.status}
         </span>
       ),
+      minWidth: 400,
     },
     {
-      key: "appliedDate",
-      label: "Applied",
+      key: "priority",
+      label: "Priority",
+      render: (row) => (
+        <span className={`priority priority-${row.priority?.toLowerCase()}`}>
+          {row.priority}
+        </span>
+      ),
+      minWidth: 600,
+    },
+    {
+      key: "source",
+      label: "Source",
+      render: (row) => row.source || "-",
+      minWidth: 800,
+    },
+    {
+      key: "updatedAt",
+      label: "Last Updated",
       render: (row) =>
-        row.appliedAt ? new Date(row.appliedAt).toLocaleDateString() : "-",
+        row.updatedAt ? new Date(row.updatedAt).toLocaleDateString() : "-",
     },
     {
       key: "actions",
       label: "Actions",
       isActions: true,
-      render: (row) => (
+      render: (row, {tableWidth}) => (
         <div className="actions">
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={() => navigate(`/applications/${row._id}`)}
-          >
-            View
-          </button>
-          <DeleteButton onClick={() => handleDeleteApplication(row._id)} />
+          <EditButton onClick={() => navigate(`/applications/${row._id}/edit`)} size={tableWidth < 500 ? "icon" : "xs"} />
+          <DeleteButton onClick={() => handleDeleteApplication(row._id)} size={tableWidth < 500 ? "icon" : "xs"} />
         </div>
       ),
     },
@@ -130,40 +137,26 @@ const CompanyDetails = () => {
       }
       errors={errors}
     >
-      <div className="details-container">
-        <div className="card">
-          <div className="card-header">
-            <div className="card-field">
-              <strong>Company:</strong> {company.name}
-            </div>
-          </div>
-          {company.description && (
-            <div className="card-field">
-              <strong>Description:</strong> <p>{company.description}</p>
-            </div>
-          )}
-          {company.notes && (
-            <div className="card-field">
-              <strong>Notes:</strong> <p>{company.notes}</p>
-            </div>
-          )}
-          {company.url && (
-            <div className="card-field">
-              <strong>Link:</strong>{" "}
-              <a href={company.url} target="_blank" rel="noopener noreferrer">
-                Website
-              </a>
-            </div>
-          )}
-        </div>
-        <br></br>
-        <h2>Job Applications</h2>
-        <DataTable
-          columns={applicationColumns}
-          data={relatedApplications}
-          emptyState={<p>No applications for this company.</p>}
-        />
-      </div>
+      <DetailsCard
+        title={{ label: "Company", value: company.name }}
+        fields={[
+          { label: "Website", value: company.url ? (
+            <a href={company.url} target="_blank" rel="noopener noreferrer">
+              {company.url}
+            </a>
+          ) : null },
+          { label: "Description", value: company.description || null },
+          { label: "Notes",       value: company.notes       || null },
+        ]}
+      />
+      <h2>Job Applications</h2>
+      <DataTable
+        columns={applicationColumns}
+        data={relatedApplications}
+        emptyState={<p>No applications for this company.</p>}
+        sortField="updatedAt"
+        sortDir="desc"
+      />
     </PageContainer>
   );
 };

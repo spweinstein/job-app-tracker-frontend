@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   deleteApplication,
   getApplications,
@@ -10,8 +11,16 @@ import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
 import { ListPagination } from "../shared/list/ListPagination.jsx";
 
-const ApplicationList = () => {
+const ApplicationList = ({setHeader = () => {}}) => {
   const navigate = useNavigate();
+  useEffect(() => {
+    if (setHeader && typeof setHeader === "function") {
+    setHeader({
+      title: "Applications",
+      actions: <Link to="/applications/new" className="btn btn-lg btn-primary">Create</Link>,
+    });
+    }
+  }, []);
 
   const {
     data,
@@ -109,15 +118,17 @@ const ApplicationList = () => {
   ];
 
   return (
-    <PageContainer
-      title="Applications"
-      actions={
-        <Link to="/applications/new" className="btn btn-lg btn-primary">
-          Create
-        </Link>
-      }
-      errors={errors}
-    >
+    <>
+    {/* // <PageContainer
+    //   title="Applications"
+    //   actions={
+    //     <Link to="/applications/new" className="btn btn-lg btn-primary">
+    //       Create
+    //     </Link>
+    //   }
+    //   errors={errors}
+    // > */}
+
       <ListSearch
         value={query}
         onChange={setQuery}
@@ -133,7 +144,8 @@ const ApplicationList = () => {
         emptyState={loading ? <p>Loading…</p> : <p>No applications found.</p>}
       />
       <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-    </PageContainer>
+    {/* // </PageContainer> */}
+    </>
   );
 };
 

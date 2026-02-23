@@ -1,35 +1,30 @@
 .card {
-  /* max-width: 100vw; */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
   padding: var(--space-xl);
   border: var(--border);
+  border-radius: var(--radius);
   background: var(--bg-white);
   box-shadow: var(--shadow-sm);
-  gap: var(--space-md);
-  /* min-width: 80vw; */
   font-size: 14px;
 }
 
 .card-header {
   padding-bottom: var(--space-md);
-  margin-bottom: var(--space-md);
   border-bottom: 1px solid var(--border-light);
 }
 
-.card-header div.card-field:first-child {
-  font-size: 16x;
+.card-title {
+  font-size: 17px;
   font-weight: 700;
   color: var(--primary);
 }
 
-.card-header div.card-field:nth-child(2) {
-  font-size: 16px;
+.card-subtitle {
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
-}
-
-.card strong {
-  color: var(--text-primary);
-  font-weight: 600;
 }
 
 .card .actions {
@@ -39,13 +34,18 @@
   border-top: 1px solid var(--border-light);
 }
 
-.card > div {
-  padding-bottom: var(--space-sm);
+.card-field {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  align-items: baseline;
+  gap: var(--space-sm);
 }
 
-.card .card-field :first-child {
+.card-field strong {
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: var(--text-light);
+  padding-top: 2px; /* align with taller values like badges */
 }

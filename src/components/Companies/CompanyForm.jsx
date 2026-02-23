@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createCompany } from "../../services/companyService";
 import { useNavigate } from "react-router";
-import { FormRow, FormField, TextInput, FormContainer } from "../shared/forms";
+import { FormRow, FormField, TextInput, TextAreaInput, FormContainer } from "../shared/forms";
 import { PageContainer } from "../shared/layout";
 import useErrors from "../../hooks/useErrors.js";
 
@@ -49,14 +49,14 @@ const CompanyForm = () => {
           </FormField>
         </FormRow>
         <FormField label="Description">
-          <TextInput
+          <TextAreaInput
             name="description"
             value={formData.description}
             onChange={handleChange}
           />
         </FormField>
         <FormField label="Notes">
-          <TextInput
+          <TextAreaInput
             name="notes"
             value={formData.notes}
             onChange={handleChange}

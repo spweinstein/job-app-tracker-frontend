@@ -268,12 +268,12 @@ const ResumeForm = () => {
                 />
               </FormField>
               <FormField label="Company">
-                <SelectInput
+                <SearchableSelect
                   name="company"
                   value={item.company}
                   onChange={(e) => onChange(index, e)}
-                  optionLabels={companyNames}
-                  optionValues={companyIds}
+                  loadOptions={loadCompanies}
+                  required
                 />
               </FormField>
               <FormField label="Year">
@@ -318,12 +318,12 @@ const ResumeForm = () => {
                 />
               </FormField>
               <FormField label="Company">
-                <SelectInput
+                <SearchableSelect
                   name="company"
                   value={item.company}
                   onChange={(e) => onChange(index, e)}
-                  optionLabels={companyNames}
-                  optionValues={companyIds}
+                  loadOptions={loadCompanies}
+                  required
                 />
               </FormField>
               <FormField label="Year">

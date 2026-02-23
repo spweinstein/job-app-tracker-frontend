@@ -16,7 +16,6 @@ const DataTable = ({ columns, data, emptyState, sortField, sortDir, onSort }) =>
   };
 
   const visibleColumns = columns.filter(filterColumn);
-  console.log('visible', visibleColumns.map(e=>e.key));
 
   return (
     <>

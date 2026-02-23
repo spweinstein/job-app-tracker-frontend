@@ -5,13 +5,14 @@ import {
 } from "../../services/coverLetterService.js";
 import { useParams, useNavigate, Link } from "react-router";
 import { PageContainer } from "../shared/layout/index.js";
-import "../shared/views/RecordDetails/RecordDetails.css";
+import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
 import { DeleteButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
 
 const CoverLetterDetails = () => {
-  const [coverLetter, setCoverLetter] = useState({ _id: null });
+  const [coverLetter, setCoverLetter] = useState(null);
+  const [loading, setLoading] = useState(true);
   const {errors, addError, clearErrors} = useErrors();
   const { coverLetterId } = useParams();
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ const CoverLetterDetails = () => {
         setCoverLetter(res);
       } catch (e) {
         addError(e.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchCoverLetter();
@@ -37,12 +40,12 @@ const CoverLetterDetails = () => {
     }
   };
 
-  if (coverLetter?._id === null) return <h3>Loading...</h3>;
+  if (loading) return <p>Loading…</p>;
   if (!coverLetter?._id) return <h3>Cover Letter Not Found</h3>;
 
   return (
     <PageContainer
-      title="Cover Letter"
+      title={coverLetter.name}
       actions={
         <>
           <Link
@@ -56,13 +59,14 @@ const CoverLetterDetails = () => {
       }
       errors={errors}
     >
-      <div className="card">
-        <div className="card-header">
-          <h3>{coverLetter.name}          <span className="cover-letter-version" style={{float: "right", opacity: 0.7}}> v{coverLetter.version || "0"}</span>
-          </h3>
-        </div>
-        
-      </div>
+      <DetailsCard
+        title={{ label: "Name",    value: coverLetter.name }}
+        subtitle={{ label: "Version", value: `v${coverLetter.version || "0"}` }}
+        fields={[
+          { label: "Body",  value: coverLetter.body  || null },
+          { label: "Notes", value: coverLetter.notes || null },
+        ]}
+      />
       <DocumentLineagePanel document={coverLetter} basePath="/cover-letters" />
     </PageContainer>
   );

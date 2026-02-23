@@ -5,7 +5,7 @@ import {
   deleteCompany,
 } from "../../services/companyService";
 import { useNavigate, useParams } from "react-router";
-import { FormRow, FormField, TextInput, FormContainer } from "../shared/forms";
+import { FormRow, FormField, TextInput, FormContainer, TextAreaInput } from "../shared/forms";
 import { PageContainer } from "../shared/layout";
 import { DeleteButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
@@ -84,14 +84,14 @@ const CompanyEdit = () => {
           </FormField>
         </FormRow>
         <FormField label="Description">
-          <TextInput
+          <TextAreaInput
             name="description"
             value={formData.description}
             onChange={handleChange}
           />
         </FormField>
         <FormField label="Notes">
-          <TextInput
+          <TextAreaInput
             name="notes"
             value={formData.notes}
             onChange={handleChange}
