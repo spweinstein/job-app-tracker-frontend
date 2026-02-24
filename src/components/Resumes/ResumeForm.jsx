@@ -12,8 +12,8 @@ import {
   RepeatableFieldGroup,
   SearchableSelect,
 } from "../shared/forms";
-import { PageContainer } from "../shared/layout";
 import { FormRow } from "../shared/forms";
+import { BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
 const EMPTY_EXPERIENCE = {
@@ -52,8 +52,9 @@ const loadCompanies = async (q) => {
   return res.data.map((c) => ({ label: c.name, value: c._id }));
 };
 
-const ResumeForm = () => {
+const ResumeForm = ({ setHeader = () => {} }) => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const [searchParams] = useSearchParams();
   const parentId = searchParams.get("parentId");
   const [formData, setFormData] = useState({
@@ -68,6 +69,13 @@ const ResumeForm = () => {
     skills: [],
   });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setHeader({
+      title: parentId ? "New Version" : "New Resume",
+      actions: <BackButton onClick={() => navigate(-1)} />,
+    });
+  }, [parentId]);
 
   useEffect(() => {
     if (!parentId) return;
@@ -119,6 +127,7 @@ const ResumeForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       await createResume({
         ...formData,
@@ -128,13 +137,14 @@ const ResumeForm = () => {
       navigate("/resumes");
     } catch (e) {
       addError(e.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <PageContainer title={parentId ? "New Version" : "New Resume"} errors={errors}>
-      <FormContainer onSubmit={handleSubmit}>
-        <FormRow>
+    <FormContainer onSubmit={handleSubmit} errors={errors}>
+      <FormRow>
         <FormField label="Name">
           <TextInput
             name="name"
@@ -146,227 +156,227 @@ const ResumeForm = () => {
         <FormField label="Link">
           <TextInput name="link" value={formData.link} onChange={handleChange} />
         </FormField>
-        </FormRow>
-        <FormField label="Summary">
-          <TextAreaInput
-            name="summary"
-            value={formData.summary}
-            onChange={handleChange}
-          />
-        </FormField>
-        <FormField label="Notes">
-          <TextAreaInput
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-          />
-        </FormField>
-
-        <RepeatableFieldGroup
-          label="Experience"
-          items={formData.experience}
-          emptyItem={EMPTY_EXPERIENCE}
-          onItemsChange={(experience) =>
-            setFormData((prev) => ({ ...prev, experience }))
-          }
-          renderItem={(item, index, onChange) => (
-            <>
-              <FormField label="Company">
-                <SearchableSelect
-                  name="company"
-                  value={item.company}
-                  onChange={(e) => onChange(index, e)}
-                  loadOptions={loadCompanies}
-                  required
-                />
-              </FormField>
-              <FormField label="Title">
-                <TextInput
-                  name="title"
-                  value={item.title}
-                  onChange={(e) => onChange(index, e)}
-                  required
-                />
-              </FormField>
-              <FormField label="Start Date">
-                <DateInput
-                  name="startDate"
-                  value={item.startDate}
-                  onChange={(e) => onChange(index, e)}
-                  required
-                />
-              </FormField>
-              <FormField label="End Date">
-                <DateInput
-                  name="endDate"
-                  value={item.endDate}
-                  onChange={(e) => onChange(index, e)}
-                />
-              </FormField>
-              <FormField label="Description">
-                <TextAreaInput
-                  name="description"
-                  value={item.description}
-                  onChange={(e) => onChange(index, e)}
-                />
-              </FormField>
-            </>
-          )}
+      </FormRow>
+      <FormField label="Summary">
+        <TextAreaInput
+          name="summary"
+          value={formData.summary}
+          onChange={handleChange}
         />
-
-        <RepeatableFieldGroup
-          label="Education"
-          items={formData.education}
-          emptyItem={EMPTY_EDUCATION}
-          onItemsChange={(education) =>
-            setFormData((prev) => ({ ...prev, education }))
-          }
-          renderItem={(item, index, onChange) => (
-            <>
-              <FormField label="Degree">
-                <TextInput
-                  name="degree"
-                  value={item.degree}
-                  onChange={(e) => onChange(index, e)}
-                  required
-                />
-              </FormField>
-              <FormField label="School">
-                <TextInput
-                  name="school"
-                  value={item.school}
-                  onChange={(e) => onChange(index, e)}
-                  required
-                />
-              </FormField>
-              <FormField label="Year">
-                <TextInput
-                  name="year"
-                  value={item.year}
-                  onChange={(e) => onChange(index, e)}
-                />
-              </FormField>
-            </>
-          )}
+      </FormField>
+      <FormField label="Notes">
+        <TextAreaInput
+          name="notes"
+          value={formData.notes}
+          onChange={handleChange}
         />
+      </FormField>
 
-        <RepeatableFieldGroup
-          label="Projects"
-          items={formData.projects}
-          emptyItem={EMPTY_PROJECT}
-          onItemsChange={(projects) =>
-            setFormData((prev) => ({ ...prev, projects }))
-          }
-          renderItem={(item, index, onChange) => (
-            <>
-              <FormField label="Title">
-                <TextInput
-                  name="title"
-                  value={item.title}
-                  onChange={(e) => onChange(index, e)}
-                  required
-                />
-              </FormField>
-              <FormField label="Company">
-                <SelectInput
-                  name="company"
-                  value={item.company}
-                  onChange={(e) => onChange(index, e)}
-                  optionLabels={companyNames}
-                  optionValues={companyIds}
-                />
-              </FormField>
-              <FormField label="Year">
-                <TextInput
-                  name="year"
-                  value={item.year}
-                  onChange={(e) => onChange(index, e)}
-                />
-              </FormField>
-              <FormField label="Link">
-                <TextInput
-                  name="link"
-                  value={item.link}
-                  onChange={(e) => onChange(index, e)}
-                />
-              </FormField>
-              <FormField label="Description">
-                <TextAreaInput
-                  name="description"
-                  value={item.description}
-                  onChange={(e) => onChange(index, e)}
-                />
-              </FormField>
-            </>
-          )}
-        />
-
-        <RepeatableFieldGroup
-          label="Certifications"
-          items={formData.certifications}
-          emptyItem={EMPTY_CERTIFICATION}
-          onItemsChange={(certifications) =>
-            setFormData((prev) => ({ ...prev, certifications }))
-          }
-          renderItem={(item, index, onChange) => (
-            <>
-              <FormField label="Title">
-                <TextInput
-                  name="title"
-                  value={item.title}
-                  onChange={(e) => onChange(index, e)}
-                />
-              </FormField>
-              <FormField label="Company">
-                <SelectInput
-                  name="company"
-                  value={item.company}
-                  onChange={(e) => onChange(index, e)}
-                  optionLabels={companyNames}
-                  optionValues={companyIds}
-                />
-              </FormField>
-              <FormField label="Year">
-                <TextInput
-                  name="year"
-                  value={item.year}
-                  onChange={(e) => onChange(index, e)}
-                />
-              </FormField>
-              <FormField label="Description">
-                <TextAreaInput
-                  name="description"
-                  value={item.description}
-                  onChange={(e) => onChange(index, e)}
-                />
-              </FormField>
-            </>
-          )}
-        />
-
-        <RepeatableFieldGroup
-          label="Skills"
-          items={formData.skills}
-          emptyItem={EMPTY_SKILL}
-          onItemsChange={(skills) =>
-            setFormData((prev) => ({ ...prev, skills }))
-          }
-          renderItem={(item, index, onChange) => (
-            <FormField label="Skill">
+      <RepeatableFieldGroup
+        label="Experience"
+        items={formData.experience}
+        emptyItem={EMPTY_EXPERIENCE}
+        onItemsChange={(experience) =>
+          setFormData((prev) => ({ ...prev, experience }))
+        }
+        renderItem={(item, index, onChange) => (
+          <>
+            <FormField label="Company">
+              <SearchableSelect
+                name="company"
+                value={item.company}
+                onChange={(e) => onChange(index, e)}
+                loadOptions={loadCompanies}
+                required
+              />
+            </FormField>
+            <FormField label="Title">
               <TextInput
-                name="skill"
-                value={item.skill}
+                name="title"
+                value={item.title}
+                onChange={(e) => onChange(index, e)}
+                required
+              />
+            </FormField>
+            <FormField label="Start Date">
+              <DateInput
+                name="startDate"
+                value={item.startDate}
+                onChange={(e) => onChange(index, e)}
+                required
+              />
+            </FormField>
+            <FormField label="End Date">
+              <DateInput
+                name="endDate"
+                value={item.endDate}
                 onChange={(e) => onChange(index, e)}
               />
             </FormField>
-          )}
-        />
+            <FormField label="Description">
+              <TextAreaInput
+                name="description"
+                value={item.description}
+                onChange={(e) => onChange(index, e)}
+              />
+            </FormField>
+          </>
+        )}
+      />
 
-        <div className="actions">
-          <button type="submit">Add Resume</button>
-        </div>
-      </FormContainer>
-    </PageContainer>
+      <RepeatableFieldGroup
+        label="Education"
+        items={formData.education}
+        emptyItem={EMPTY_EDUCATION}
+        onItemsChange={(education) =>
+          setFormData((prev) => ({ ...prev, education }))
+        }
+        renderItem={(item, index, onChange) => (
+          <>
+            <FormField label="Degree">
+              <TextInput
+                name="degree"
+                value={item.degree}
+                onChange={(e) => onChange(index, e)}
+                required
+              />
+            </FormField>
+            <FormField label="School">
+              <TextInput
+                name="school"
+                value={item.school}
+                onChange={(e) => onChange(index, e)}
+                required
+              />
+            </FormField>
+            <FormField label="Year">
+              <TextInput
+                name="year"
+                value={item.year}
+                onChange={(e) => onChange(index, e)}
+              />
+            </FormField>
+          </>
+        )}
+      />
+
+      <RepeatableFieldGroup
+        label="Projects"
+        items={formData.projects}
+        emptyItem={EMPTY_PROJECT}
+        onItemsChange={(projects) =>
+          setFormData((prev) => ({ ...prev, projects }))
+        }
+        renderItem={(item, index, onChange) => (
+          <>
+            <FormField label="Title">
+              <TextInput
+                name="title"
+                value={item.title}
+                onChange={(e) => onChange(index, e)}
+                required
+              />
+            </FormField>
+            <FormField label="Company">
+              <SearchableSelect
+                name="company"
+                value={item.company}
+                onChange={(e) => onChange(index, e)}
+                loadOptions={loadCompanies}
+                required
+              />
+            </FormField>
+            <FormField label="Year">
+              <TextInput
+                name="year"
+                value={item.year}
+                onChange={(e) => onChange(index, e)}
+              />
+            </FormField>
+            <FormField label="Link">
+              <TextInput
+                name="link"
+                value={item.link}
+                onChange={(e) => onChange(index, e)}
+              />
+            </FormField>
+            <FormField label="Description">
+              <TextAreaInput
+                name="description"
+                value={item.description}
+                onChange={(e) => onChange(index, e)}
+              />
+            </FormField>
+          </>
+        )}
+      />
+
+      <RepeatableFieldGroup
+        label="Certifications"
+        items={formData.certifications}
+        emptyItem={EMPTY_CERTIFICATION}
+        onItemsChange={(certifications) =>
+          setFormData((prev) => ({ ...prev, certifications }))
+        }
+        renderItem={(item, index, onChange) => (
+          <>
+            <FormField label="Title">
+              <TextInput
+                name="title"
+                value={item.title}
+                onChange={(e) => onChange(index, e)}
+              />
+            </FormField>
+            <FormField label="Company">
+              <SearchableSelect
+                name="company"
+                value={item.company}
+                onChange={(e) => onChange(index, e)}
+                loadOptions={loadCompanies}
+                required
+              />
+            </FormField>
+            <FormField label="Year">
+              <TextInput
+                name="year"
+                value={item.year}
+                onChange={(e) => onChange(index, e)}
+              />
+            </FormField>
+            <FormField label="Description">
+              <TextAreaInput
+                name="description"
+                value={item.description}
+                onChange={(e) => onChange(index, e)}
+              />
+            </FormField>
+          </>
+        )}
+      />
+
+      <RepeatableFieldGroup
+        label="Skills"
+        items={formData.skills}
+        emptyItem={EMPTY_SKILL}
+        onItemsChange={(skills) =>
+          setFormData((prev) => ({ ...prev, skills }))
+        }
+        renderItem={(item, index, onChange) => (
+          <FormField label="Skill">
+            <TextInput
+              name="skill"
+              value={item.skill}
+              onChange={(e) => onChange(index, e)}
+            />
+          </FormField>
+        )}
+      />
+
+      <div className="actions">
+        <SubmitButton loading={submitting}>Add Resume</SubmitButton>
+        <CancelButton onClick={() => navigate(-1)} />
+      </div>
+    </FormContainer>
   );
 };
 

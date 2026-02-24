@@ -1,14 +1,13 @@
+import { useEffect } from "react";
 import { getResumes, deleteResume } from "../../services/resumeService.js";
 import { Link, useNavigate } from "react-router";
-import { PageContainer } from "../shared/layout/index.js";
 import { DataTable } from "../shared/views/index.js";
-import { DeleteButton, EditButton } from "../shared/ui/index.js";
+import { DeleteButton, EditButton, LoadingSpinner } from "../shared/ui/index.js";
 import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
 import { ListPagination } from "../shared/list/ListPagination.jsx";
-import useElementWidth from "../../hooks/useElementWidth.js";
 
-const ResumeList = () => {
+const ResumeList = ({ setHeader = () => {} }) => {
   const navigate = useNavigate();
 
   const {
@@ -26,6 +25,17 @@ const ResumeList = () => {
     setPage,
     refresh,
   } = usePaginatedQuery(getResumes);
+
+  useEffect(() => {
+    setHeader({
+      title: "Resumes",
+      actions: (
+        <Link to="/resumes/new" className="btn btn-lg btn-primary">
+          Create
+        </Link>
+      ),
+    });
+  }, []);
 
   const handleDelete = async (resumeId) => {
     try {
@@ -61,10 +71,9 @@ const ResumeList = () => {
     {
       key: "version",
       label: "Version",
-      render: (row) =>
-        row.version || "0",
+      render: (row) => row.version || "0",
       className: "col-hide-tablet",
-      minWidth: 600
+      minWidth: 600,
     },
     {
       key: "updatedAt",
@@ -87,31 +96,27 @@ const ResumeList = () => {
   ];
 
   return (
-    <PageContainer
-      title="Resumes"
-      actions={
-        <Link to="/resumes/new" className="btn btn-lg btn-primary">
-          Create
-        </Link>
-      }
-      errors={errors}
-    >
+    <>
       <ListSearch
         value={query}
         onChange={setQuery}
         placeholder="Search resumes…"
         total={total}
       />
-      <DataTable
-        columns={columns}
-        data={data}
-        sortField={sortField}
-        sortDir={sortDir}
-        onSort={toggleSort}
-        emptyState={loading ? <p>Loading…</p> : <p>No resumes found.</p>}
-      />
+      {loading ? (
+        <LoadingSpinner />
+        ) : (
+        <DataTable
+          columns={columns}
+          data={data}
+          sortField={sortField}
+          sortDir={sortDir}
+          onSort={toggleSort}
+          emptyState={<p>No resumes found.</p>}
+        />
+      )}
       <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-    </PageContainer>
+    </>
   );
 };
 

@@ -4,29 +4,17 @@ import {
   deleteApplication,
 } from "../../services/applicationService.js";
 import { useParams, useNavigate, Link } from "react-router";
-import { PageContainer } from "../shared/layout/index.js";
-import "../shared/views/RecordDetails/RecordDetails.css";
-import { DeleteButton } from "../shared/ui/index.js";
+import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
+import { DeleteButton, EditButton, BackButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
+import { LoadingSpinner } from "../shared/ui/index.js";
 
-const ApplicationDetails = () => {
-  const [application, setApplication] = useState({ _id: null });
+const ApplicationDetails = ({setHeader = () => {}}) => {
+  const [application, setApplication] = useState(null);
+  const [loading, setLoading] = useState(true);
   const {errors, addError, clearErrors} = useErrors();
   const { applicationId } = useParams();
   const navigate = useNavigate();
-
-  const fetchApplication = async () => {
-    try {
-      const res = await getApplication(applicationId);
-      setApplication(res);
-    } catch (e) {
-      addError(e.message);
-    }
-  };
-
-  useEffect(() => {
-    fetchApplication();
-  }, [applicationId]);
 
   const handleDeleteClick = async () => {
     try {
@@ -37,84 +25,99 @@ const ApplicationDetails = () => {
     }
   };
 
-  // if (application?._id === null) return <h3>Loading...</h3>;
+  useEffect(() => {
+    if (setHeader && typeof setHeader === "function") {
+    setHeader({
+      title: "Application Details",
+      // Back, Edit, and Delete buttons
+      actions: 
+      <>
+        <BackButton onClick={() => navigate(-1)} />
+        <EditButton onClick={() => navigate(`/applications/${applicationId}/edit`)} />
+        <DeleteButton onClick={handleDeleteClick} />
+      </>
+    });
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchApplication = async () => {
+      try {
+        const res = await getApplication(applicationId);
+        setApplication(res);
+      } catch (e) {
+        addError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchApplication();
+  }, [applicationId]);
+
+  if (loading) return <LoadingSpinner />;
   if (!application?._id) return <h3>Application Not Found</h3>;
 
   return (
-    <PageContainer
-      title="Application"
-      actions={
-        <>
-          <Link
-            to={`/applications/${applicationId}/edit`}
-            className="btn btn-primary btn-sm"
-          >
-            Edit
-          </Link>
-          <DeleteButton onClick={handleDeleteClick} />
-        </>
-      }
-      errors={errors}
-    >
-      <div className="card">
-        <div className="card-header">
-          <div className="card-field">
-            <strong>Company:</strong>{" "}
-            {application.company?._id ? (
-              <Link to={`/companies/${application.company._id}`}>
-                {application.company.name}
-              </Link>
-            ) : (
-              application.company?.name || "N/A"
-            )}
-          </div>
-          <div className="card-field">
-            <strong>Job Title:</strong> {application.title || "Untitled"}
-          </div>
-        </div>
-        <div className="card-field">
-          <strong>Resume:</strong>{" "}
-          {application.resume?._id ? (
-            <Link to={`/resumes/${application.resume._id}`}>
-              {application.resume.name || "Resume"}
+      <DetailsCard
+        title={{
+          label: "Company",
+          value: application.company?._id ? (
+            <Link to={`/companies/${application.company._id}`}>
+              {application.company.name}
             </Link>
-          ) : (
-            "N/A"
-          )}
-        </div>
-        <div className="card-field">
-          <strong>Status:</strong>{" "}
-          <span className={`status status-${application.status.toLowerCase()}`}>
-            {application.status}
-          </span>
-        </div>
-        <div className="card-field">
-          <strong>Priority:</strong>{" "}
-          <span
-            className={`priority priority-${application.priority.toLowerCase()}`}
-          >
-            {application.priority}
-          </span>
-        </div>
-        <div className="card-field">
-          <strong>Source:</strong> {application.source}
-        </div>
-        {application.appliedAt && (
-          <div className="card-field">
-            <strong>Applied At:</strong>{" "}
-            {new Date(application.appliedAt).toLocaleDateString()}
-          </div>
-        )}
-        {application.url && (
-          <div className="card-field">
-            <strong>Link:</strong>{" "}
-            <a href={application.url} target="_blank" rel="noopener noreferrer">
-              View Application
-            </a>
-          </div>
-        )}
-      </div>
-    </PageContainer>
+          ) : (application.company?.name || "Unknown"),
+        }}
+        subtitle={{ label: "Job Title", value: application.title || "Untitled" }}
+        fields={[
+          {
+            label: "Status",
+            value: (
+              <span className={`status status-${application.status?.toLowerCase()}`}>
+                {application.status}
+              </span>
+            ),
+          },
+          {
+            label: "Priority",
+            value: (
+              <span className={`priority priority-${application.priority?.toLowerCase()}`}>
+                {application.priority}
+              </span>
+            ),
+          },
+          { label: "Source", value: application.source || null },
+          {
+            label: "Applied",
+            value: application.appliedAt
+              ? new Date(application.appliedAt).toLocaleDateString()
+              : null,
+          },
+          {
+            label: "Resume",
+            value: application.resume?._id ? (
+              <Link to={`/resumes/${application.resume._id}`}>
+                {application.resume.name || "Resume"}
+              </Link>
+            ) : null,
+          },
+          {
+            label: "Cover Letter",
+            value: application.coverLetter?._id ? (
+              <Link to={`/cover-letters/${application.coverLetter._id}`}>
+                {application.coverLetter.name || "Cover Letter"}
+              </Link>
+            ) : null
+          },
+          {
+            label: "Link",
+            value: application.url ? (
+              <a href={application.url} target="_blank" rel="noopener noreferrer">
+                View Posting ↗
+              </a>
+            ) : null,
+          },
+        ]}
+      />
   );
 };
 

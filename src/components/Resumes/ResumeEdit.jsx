@@ -16,8 +16,7 @@ import {
   RepeatableFieldGroup,
   SearchableSelect,
 } from "../shared/forms";
-import { PageContainer } from "../shared/layout";
-import { DeleteButton } from "../shared/ui/index.js";
+import { DeleteButton, BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
 const EMPTY_EXPERIENCE = {
@@ -56,8 +55,9 @@ const loadCompanies = async (q) => {
   return res.data.map((c) => ({ label: c.name, value: c._id }));
 };
 
-const ResumeEdit = () => {
+const ResumeEdit = ({ setHeader = () => {} }) => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     link: "",
@@ -121,6 +121,7 @@ const ResumeEdit = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try { 
       await updateResume(resumeId, {
         ...formData,
@@ -145,6 +146,8 @@ const ResumeEdit = () => {
       navigate(`/resumes/${resumeId}`);
     } catch (e) {
       addError(e.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -157,15 +160,20 @@ const ResumeEdit = () => {
     }
   };
 
+  useEffect(() => {
+    setHeader({
+      title: "Edit Resume",
+      actions: (
+        <>
+          <BackButton onClick={() => navigate(-1)} />
+          <DeleteButton onClick={handleDeleteClick} />
+        </>
+      ),
+    });
+  }, [resumeId]);
+
   return (
-    <PageContainer
-      title="Edit Resume"
-      actions={
-        <DeleteButton onClick={handleDeleteClick} />
-      }
-      errors={errors}
-    >
-      <FormContainer onSubmit={handleSubmit}>
+      <FormContainer onSubmit={handleSubmit} errors={errors}>
         <FormField label="Name">
           <TextInput
             name="name"
@@ -393,10 +401,10 @@ const ResumeEdit = () => {
         />
 
         <div className="actions">
-          <button type="submit">Save Resume</button>
+          <SubmitButton loading={submitting}>Save Resume</SubmitButton>
+          <CancelButton onClick={() => navigate(-1)} />
         </div>
       </FormContainer>
-    </PageContainer>
   );
 };
 

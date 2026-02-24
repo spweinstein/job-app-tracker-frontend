@@ -4,11 +4,14 @@ import { register as registerUser } from "../services/authService";
 import { UserContext } from "../contexts/UserContext.jsx";
 import { PageContainer } from "./shared/layout/index.js";
 import { FormContainer, FormField, TextInput, PasswordInput } from "./shared/forms/index.js";
+import { SubmitButton, CancelButton } from "./shared/ui/index.js";
 import useErrors from "../hooks/useErrors.js";
 import useForm from "../hooks/useForm.js";
+import "./shared/forms/AuthForm.css";
 
 const RegisterForm = () => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
   
@@ -19,9 +22,16 @@ const RegisterForm = () => {
   };
 
   const onSubmit = async (formData) => {
-    const newUser = await registerUser(formData);
-    setUser(newUser);
-    navigate("/");
+    setSubmitting(true);
+    try {
+      const newUser = await registerUser(formData);
+      setUser(newUser);
+      navigate("/");
+    } catch (e) {
+      addError(e.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const { register, formData, setFormData, fieldErrors, handleChange, handleSubmit, formErrors } = useForm(initialState, onSubmit);
@@ -32,7 +42,7 @@ const RegisterForm = () => {
 
   return (
     <PageContainer title="Sign Up" errors={errors}>
-      <FormContainer onSubmit={handleSubmit} errors={formErrors}>
+      <FormContainer className="auth-form" onSubmit={handleSubmit} errors={formErrors}>
         <FormField label="Username">
           {/* <TextInput name="username" value={username} onChange={handleChange} required /> */}
           <TextInput {...register("username", (value) => value.length > 0 ? undefined : "Username is required")} />
@@ -46,10 +56,10 @@ const RegisterForm = () => {
           <PasswordInput {...register("passwordConf", (value) => value.length > 0 ? undefined : "Password confirmation is required")} />
         </FormField>
         <div>
-          <button type="submit" disabled={isFormInvalid()}>
+          <SubmitButton loading={submitting} disabled={isFormInvalid()}>
             Sign Up
-          </button>
-          <button onClick={() => navigate("/")}>Cancel</button>
+          </SubmitButton>
+          <CancelButton onClick={() => navigate("/")} />
         </div>
       </FormContainer>
     </PageContainer>

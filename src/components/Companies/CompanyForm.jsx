@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createCompany } from "../../services/companyService";
 import { useNavigate } from "react-router";
-import { FormRow, FormField, TextInput, FormContainer } from "../shared/forms";
-import { PageContainer } from "../shared/layout";
+import { FormRow, FormField, TextInput, TextAreaInput, FormContainer } from "../shared/forms";
 import useErrors from "../../hooks/useErrors.js";
+import { BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 
-const CompanyForm = () => {
+const CompanyForm = ({ setHeader = () => {} }) => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     url: "",
@@ -16,6 +17,13 @@ const CompanyForm = () => {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    setHeader({
+      title: "New Company",
+      actions: <BackButton onClick={() => navigate(-1)} />,
+    });
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
@@ -23,50 +31,51 @@ const CompanyForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
-      console.log(formData);
       const res = await createCompany(formData);
       navigate("/companies");
     } catch (e) {
       addError(e.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <PageContainer title="New Company" errors={errors}>
-      <FormContainer className="crud-form" onSubmit={handleSubmit}>
-        <FormRow>
-          <FormField label="Name">
-            <TextInput
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </FormField>
-          <FormField label="Website">
-            <TextInput name="url" value={formData.url} onChange={handleChange} />
-          </FormField>
-        </FormRow>
-        <FormField label="Description">
+    <FormContainer className="crud-form" onSubmit={handleSubmit} errors={errors}>
+      <FormRow>
+        <FormField label="Name">
           <TextInput
-            name="description"
-            value={formData.description}
+            name="name"
+            value={formData.name}
             onChange={handleChange}
+            required
           />
         </FormField>
-        <FormField label="Notes">
-          <TextInput
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-          />
+        <FormField label="Website">
+          <TextInput name="url" value={formData.url} onChange={handleChange} />
         </FormField>
-        <div className="actions">
-          <button type="submit">Add New Company</button>
-        </div>
-      </FormContainer>
-    </PageContainer>
+      </FormRow>
+      <FormField label="Description">
+        <TextAreaInput
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+        />
+      </FormField>
+      <FormField label="Notes">
+        <TextAreaInput
+          name="notes"
+          value={formData.notes}
+          onChange={handleChange}
+        />
+      </FormField>
+      <div className="actions">
+        <SubmitButton loading={submitting}>Add New Company</SubmitButton>
+        <CancelButton onClick={() => navigate(-1)} />
+      </div>
+    </FormContainer>
   );
 };
 

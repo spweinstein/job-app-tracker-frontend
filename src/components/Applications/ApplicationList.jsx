@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   deleteApplication,
   getApplications,
@@ -5,13 +6,21 @@ import {
 import { Link, useNavigate } from "react-router";
 import { PageContainer } from "../shared/layout/index.js";
 import { DataTable } from "../shared/views/index.js";
-import { DeleteButton, EditButton } from "../shared/ui/index.js";
+import { DeleteButton, EditButton, LoadingSpinner } from "../shared/ui/index.js";
 import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
 import { ListPagination } from "../shared/list/ListPagination.jsx";
 
-const ApplicationList = () => {
+const ApplicationList = ({setHeader = () => {}, filterColumn, filterId, params = {}}) => {
   const navigate = useNavigate();
+  useEffect(() => {
+    if (setHeader && typeof setHeader === "function") {
+    setHeader({
+      title: "Applications",
+      actions: <Link to="/applications/new" className="btn btn-lg btn-primary">Create</Link>,
+    });
+    }
+  }, []);
 
   const {
     data,
@@ -27,7 +36,13 @@ const ApplicationList = () => {
     page,
     setPage,
     refresh,
-  } = usePaginatedQuery(getApplications, { defaultSort: "updatedAt" });
+  } = usePaginatedQuery(getApplications, { 
+    defaultSort: "updatedAt",
+    params: {
+      ...(filterColumn && filterId ? { [filterColumn]: filterId } : {}),
+      ...params
+    }
+   });
 
   const handleDelete = async (applicationId) => {
     try {
@@ -86,7 +101,7 @@ const ApplicationList = () => {
       key: "source",
       label: "Source",
       render: (row) => row.source || "-",
-      minWidth: 800,
+      minWidth: 900,
     },
     {
       key: "updatedAt",
@@ -94,6 +109,14 @@ const ApplicationList = () => {
       sortable: true,
       render: (row) =>
         row.updatedAt ? new Date(row.updatedAt).toLocaleDateString() : "-",
+      minWidth: 750,
+    },
+    {
+      key: "appliedAt",
+      label: "Applied",
+      sortable: true,
+      render: (row) =>
+        row.appliedAt ? new Date(row.appliedAt).toLocaleDateString() : "-",
     },
     {
       key: "actions",
@@ -109,31 +132,40 @@ const ApplicationList = () => {
   ];
 
   return (
-    <PageContainer
-      title="Applications"
-      actions={
-        <Link to="/applications/new" className="btn btn-lg btn-primary">
-          Create
-        </Link>
-      }
-      errors={errors}
-    >
+    <>
+    {/* // <PageContainer
+    //   title="Applications"
+    //   actions={
+    //     <Link to="/applications/new" className="btn btn-lg btn-primary">
+    //       Create
+    //     </Link>
+    //   }
+    //   errors={errors}
+    // > */}
+
       <ListSearch
         value={query}
         onChange={setQuery}
         placeholder="Search applications…"
         total={total}
       />
-      <DataTable
-        columns={columns}
-        data={data}
-        sortField={sortField}
-        sortDir={sortDir}
-        onSort={toggleSort}
-        emptyState={loading ? <p>Loading…</p> : <p>No applications found.</p>}
-      />
+
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <DataTable
+          columns={columns.filter(col=>!filterColumn || col.key !== filterColumn || col.value === filterId)}
+          data={data}
+          sortField={sortField}
+          sortDir={sortDir}
+          onSort={toggleSort}
+          emptyState={<p>No applications found.</p>}
+        />
+      )}
+
       <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-    </PageContainer>
+    {/* // </PageContainer> */}
+    </>
   );
 };
 

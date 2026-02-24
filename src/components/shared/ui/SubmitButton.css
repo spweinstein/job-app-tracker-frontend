@@ -1,0 +1,28 @@
+.submit-button {
+  position: relative;
+  min-width: 100px;
+}
+
+.submit-button--loading {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.submit-button--loading .submit-button__text {
+  margin-left: var(--space-sm);
+}
+
+.submit-button .loading-spinner {
+  padding: 0;
+  gap: 0;
+}
+
+.submit-button .loading-spinner__circle {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+.submit-button .loading-spinner__text {
+  display: none;
+}

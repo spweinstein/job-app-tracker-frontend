@@ -7,6 +7,9 @@ import "./DocumentLineagePanel.css";
  * @param {string} basePath   - e.g. "/resumes" or "/cover-letters"
  */
 const DocumentLineagePanel = ({ document, basePath }) => {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/ebbbd420-2498-4129-a13e-5fc82c7a528f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'DocumentLineagePanel.jsx:render',message:'document lineage data received',hypothesisId:'A-B',data:{basePath,docId:document?._id,version:document?.version,parent:document?.parent ?? null,childrenCount:(document?.children ?? []).length},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
   if (!document?._id) return null;
 
   const children = document.children ?? [];

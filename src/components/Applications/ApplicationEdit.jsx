@@ -6,14 +6,16 @@ import {
 } from "../../services/applicationService.js";
 import { getCompanies } from "../../services/companyService.js";
 import { getResumes } from "../../services/resumeService.js";
+import { getCoverLetters } from "../../services/coverLetterService.js";
 import { useNavigate, useParams } from "react-router";
 import { FormRow,FormField, TextInput, SelectInput, DateInput, FormContainer, SearchableSelect } from "../shared/forms";
 import { PageContainer } from "../shared/layout";
-import { DeleteButton } from "../shared/ui/index.js";
+import { DeleteButton, BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
-const ApplicationEdit = () => {
+const ApplicationEdit = ({setHeader = () => {}}) => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     company: "",
@@ -24,6 +26,17 @@ const ApplicationEdit = () => {
     appliedAt: "",
     url: "",
   });
+  useEffect(() => {
+    if (setHeader && typeof setHeader === "function") {
+    setHeader({
+      title: "Edit Application",
+      actions: <>
+        <BackButton onClick={() => navigate(-1)} />
+        <DeleteButton onClick={handleDeleteClick} />
+      </>,
+    });
+    }
+  }, []);
   const { applicationId } = useParams();
   const navigate = useNavigate();
 
@@ -54,6 +67,11 @@ const ApplicationEdit = () => {
     return res.data.map((r) => ({ label: r.name, value: r._id }));
   };
 
+  const loadCoverLetters = async (q) => { 
+    const res = await getCoverLetters({ q, limit: 20, sort: "name", sortDir: "asc" });
+    return res.data.map((c) => ({ label: c.name, value: c._id }));
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -61,6 +79,7 @@ const ApplicationEdit = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       await updateApplication(applicationId, {
         ...formData,
@@ -70,6 +89,8 @@ const ApplicationEdit = () => {
       navigate(`/applications/${applicationId}`);
     } catch (e) {
       addError(e.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -84,13 +105,6 @@ const ApplicationEdit = () => {
   };
 
   return (
-    <PageContainer
-      title="Edit Application"
-      actions={
-        <DeleteButton onClick={handleDeleteClick} />
-      }
-      errors={errors}
-    >
       <FormContainer onSubmit={handleSubmit}>
         <FormRow>
           <FormField label="Company">
@@ -158,20 +172,29 @@ const ApplicationEdit = () => {
           </FormField>
         </FormRow>
 
-        <FormField label="Resume">
-          <SearchableSelect
-            name="resume"
-            value={formData.resume}
-            onChange={handleChange}
-            loadOptions={loadResumes}
-            required
-          />
-        </FormField>
+        <FormRow>
+          <FormField label="Resume">
+            <SearchableSelect
+              name="resume"
+              value={formData.resume}
+              onChange={handleChange}
+              loadOptions={loadResumes}
+            />
+          </FormField>
+          <FormField label="Cover Letter">
+            <SearchableSelect
+              name="coverLetter"
+              value={formData.coverLetter}
+              onChange={handleChange}
+              loadOptions={loadCoverLetters}
+            />
+          </FormField>
+        </FormRow>
         <div className="actions">
-          <button type="submit">Edit Application</button>
+          <SubmitButton loading={submitting}>Edit Application</SubmitButton>
+          <CancelButton onClick={() => navigate(-1)} />
         </div>
       </FormContainer>
-    </PageContainer>
   );
 };
 

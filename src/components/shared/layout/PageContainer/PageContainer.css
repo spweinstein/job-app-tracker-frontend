@@ -10,10 +10,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-lg);
   background: var(--border-light);
   padding: var(--space-md);
   border-radius: var(--radius-sm);
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  column-gap: 4rem;
+}
+
+.page-header__actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
 }
 
 .page-header h1 {

@@ -1,0 +1,110 @@
+/* ── Auth Form Styling ── */
+
+/* Auth form container - centered card design */
+.auth-form {
+    max-width: 420px;
+    margin: var(--space-2xl) auto;
+    padding: var(--space-2xl);
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: var(--border);
+  }
+  
+  /* Add subtle gradient background to page container for auth pages */
+  .page-container:has(.auth-form) {
+    background: linear-gradient(135deg, var(--bg-body) 0%, var(--bg-surface) 100%);
+    min-height: calc(100vh - var(--navbar-height));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-xl);
+  }
+  
+  /* Auth form header styling */
+  .auth-form .page-header {
+    background: transparent;
+    padding: 0;
+    margin-bottom: var(--space-xl);
+    text-align: center;
+  }
+  
+  .auth-form .page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Form fields spacing in auth forms */
+  .auth-form .field {
+    margin-bottom: var(--space-lg);
+  }
+  
+  .auth-form .field:last-of-type {
+    margin-bottom: var(--space-xl);
+  }
+  
+  /* Enhanced input styling for auth forms */
+  .auth-form .field input {
+    transition: var(--transition);
+    background: var(--bg-white);
+  }
+  
+  .auth-form .field input:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-light);
+  }
+  
+  .auth-form .field input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light);
+    transform: translateY(-1px);
+  }
+  
+  /* Form actions container */
+  /* .form-actions {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border-light);
+    justify-content: flex-end;
+  } */
+  
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    .auth-form {
+      max-width: 100%;
+      margin: var(--space-lg) auto;
+      padding: var(--space-xl);
+    }
+  
+    .form-actions {
+      flex-direction: column;
+    }
+  
+    .form-actions button {
+      width: 100%;
+    }
+  }
+  
+  /* Subtle animation on form mount */
+  @keyframes authFormSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .auth-form {
+    animation: authFormSlideIn 0.4s ease-out;
+  }

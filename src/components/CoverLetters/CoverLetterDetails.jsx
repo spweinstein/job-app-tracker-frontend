@@ -3,15 +3,16 @@ import {
   getCoverLetter,
   deleteCoverLetter,
 } from "../../services/coverLetterService.js";
-import { useParams, useNavigate, Link } from "react-router";
-import { PageContainer } from "../shared/layout/index.js";
-import "../shared/views/RecordDetails/RecordDetails.css";
-import { DeleteButton } from "../shared/ui/index.js";
+import { useParams, useNavigate } from "react-router";
+import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
+import { BackButton, EditButton, DeleteButton, LoadingSpinner } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
+import ApplicationList from "../Applications/ApplicationList.jsx";
 
-const CoverLetterDetails = () => {
-  const [coverLetter, setCoverLetter] = useState({ _id: null });
+const CoverLetterDetails = ({ setHeader = () => {} }) => {
+  const [coverLetter, setCoverLetter] = useState(null);
+  const [loading, setLoading] = useState(true);
   const {errors, addError, clearErrors} = useErrors();
   const { coverLetterId } = useParams();
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ const CoverLetterDetails = () => {
         setCoverLetter(res);
       } catch (e) {
         addError(e.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchCoverLetter();
@@ -37,34 +40,41 @@ const CoverLetterDetails = () => {
     }
   };
 
-  if (coverLetter?._id === null) return <h3>Loading...</h3>;
+  useEffect(() => {
+    setHeader({
+      title: "Cover Letter Details",
+      actions: (
+        <>
+          <BackButton onClick={() => navigate(-1)} />
+          <EditButton onClick={() => navigate(`/cover-letters/${coverLetterId}/edit`)} />
+          <DeleteButton onClick={handleDeleteClick} />
+        </>
+      ),
+    });
+  }, [coverLetterId]);
+
+    if (loading) return <LoadingSpinner />;
   if (!coverLetter?._id) return <h3>Cover Letter Not Found</h3>;
 
   return (
-    <PageContainer
-      title="Cover Letter"
-      actions={
-        <>
-          <Link
-            to={`/cover-letters/${coverLetterId}/edit`}
-            className="btn btn-primary btn-sm"
-          >
-            Edit
-          </Link>
-          <DeleteButton onClick={handleDeleteClick} />
-        </>
-      }
-      errors={errors}
-    >
-      <div className="card">
-        <div className="card-header">
-          <h3>{coverLetter.name}          <span className="cover-letter-version" style={{float: "right", opacity: 0.7}}> v{coverLetter.version || "0"}</span>
-          </h3>
-        </div>
-        
-      </div>
+    <>
+      {errors.length > 0 && (
+        <div id="error-message">{errors.map((e) => <p key={e}>{e}</p>)}</div>
+      )}
+      <DetailsCard
+        title={{ label: "Name",    value: coverLetter.name }}
+        subtitle={{ label: "Version", value: `v${coverLetter.version || "0"}` }}
+        fields={[
+          { label: "Body",  value: coverLetter.body  || null },
+          { label: "Notes", value: coverLetter.notes || null },
+        ]}
+      />
+      <ApplicationList
+        filterColumn="coverLetter"
+        filterId={coverLetterId}
+      />
       <DocumentLineagePanel document={coverLetter} basePath="/cover-letters" />
-    </PageContainer>
+    </>
   );
 };
 

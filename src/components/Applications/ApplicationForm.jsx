@@ -2,14 +2,17 @@ import { useState, useEffect } from "react";
 import { createApplication } from "../../services/applicationService.js";
 import { getCompanies } from "../../services/companyService.js";
 import { getResumes } from "../../services/resumeService.js";
+import { getCoverLetters } from "../../services/coverLetterService.js";
 import { useNavigate } from "react-router";
 import { FormRow, FormField, TextInput, SelectInput, DateInput, FormContainer } from "../shared/forms";
 import { PageContainer } from "../shared/layout";
 import useErrors from "../../hooks/useErrors.js";
 import { SearchableSelect } from "../shared/forms";
+import { BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 
-const ApplicationForm = () => {
+const ApplicationForm = ({setHeader = () => {}}) => {
   const {errors, addError, clearErrors} = useErrors();
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     company: "",
@@ -20,7 +23,17 @@ const ApplicationForm = () => {
     appliedAt: new Date().toISOString().split("T")[0],
     url: "",
   });
-  
+  useEffect(() => {
+    if (setHeader && typeof setHeader === "function") {
+    setHeader({
+      title: "New Application",
+      // Back button
+      actions: <>
+      <BackButton onClick={() => navigate(-1)} />
+      </>,
+    });
+    }
+  }, []);
   const navigate = useNavigate();
 
   const loadCompanies = async (q) => {
@@ -33,6 +46,11 @@ const ApplicationForm = () => {
     return res.data.map((r) => ({ label: r.name, value: r._id }));
   };
 
+  const loadCoverLetters = async (q) => { 
+    const res = await getCoverLetters({ q, limit: 20, sort: "name", sortDir: "asc" });
+    return res.data.map((c) => ({ label: c.name, value: c._id }));
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -40,16 +58,18 @@ const ApplicationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       await createApplication({...formData, company: formData.company?._id ?? formData.company, resume: formData.resume?._id ?? formData.resume});
       navigate("/applications");
     } catch (e) {
       addError(e.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <PageContainer title="New Application" errors={errors}>
       <FormContainer onSubmit={handleSubmit}>
         <FormRow>
           <FormField label="Company">
@@ -116,21 +136,31 @@ const ApplicationForm = () => {
             />
           </FormField>
         </FormRow>
-
-        <FormField label="Resume">
-          <SearchableSelect
-            name="resume"
-            value={formData.resume}
-            onChange={handleChange}
-            loadOptions={loadResumes}
-            required
-          />
-        </FormField>
+        <FormRow>
+          <FormField label="Resume">
+            <SearchableSelect
+              name="resume"
+              value={formData.resume}
+              onChange={handleChange}
+              loadOptions={loadResumes}
+              required
+            />
+          </FormField>
+          <FormField label="Cover Letter">
+            <SearchableSelect
+              name="coverLetter"
+              value={formData.coverLetter}
+              onChange={handleChange}
+              loadOptions={loadCoverLetters}
+              required
+            />
+          </FormField>
+        </FormRow>
         <div className="actions">
-          <button type="submit">Add Application</button>
+          <SubmitButton loading={submitting}>Add Application</SubmitButton>
+          <CancelButton onClick={() => navigate(-1)} />
         </div>
       </FormContainer>
-    </PageContainer>
   );
 };
 

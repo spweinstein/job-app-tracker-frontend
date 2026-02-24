@@ -32,6 +32,19 @@ button[type="submit"]:not(.btn-delete):not(.btn-danger):hover {
   box-shadow: 0 0 0 3px var(--primary-light);
 }
 
+/* ── Secondary (ghost neutral) ── */
+.btn-secondary {
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+  background: transparent;
+}
+
+.btn-secondary:hover {
+  background: var(--border-light);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 3px var(--border-color);
+}
+
 /* ── Edit (ghost blue) ── */
 .btn-edit {
   color: var(--primary);
@@ -80,6 +93,13 @@ button[type="submit"]:not(.btn-delete):not(.btn-danger):hover {
   padding: var(--space-xxs) var(--space-xs);
   font-size: 12px;
   min-width: 52px;
+}
+
+.btn-icon {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-size: 1em;
 }
 
 .btn-sm {
