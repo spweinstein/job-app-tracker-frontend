@@ -5,7 +5,7 @@ import "./Resume.css";
 import { BackButton, EditButton, DeleteButton, LoadingSpinner } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
-
+import ApplicationList from "../Applications/ApplicationList.jsx";
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
@@ -215,6 +215,12 @@ const ResumeDetails = ({ setHeader = () => {} }) => {
           {resume.notes}
         </div>
       )}
+
+      <h2>Job Applications</h2>
+      <ApplicationList
+        filterColumn="resume"
+        filterId={resumeId}
+      />
 
       <DocumentLineagePanel document={resume} basePath="/resumes" />
     </>

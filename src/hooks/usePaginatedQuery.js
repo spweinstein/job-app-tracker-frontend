@@ -37,6 +37,7 @@ const usePaginatedQuery = (fetchFn, options = {}) => {
         sortDir,
         page,
         limit: defaultLimit,
+        ...params
       });
       setData(res.data);
       setTotal(res.total);

@@ -7,6 +7,7 @@ import { DeleteButton, EditButton, BackButton } from "../shared/ui/index.js";
 import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
 import useErrors from "../../hooks/useErrors.js";
 import { LoadingSpinner } from "../shared/ui/index.js";
+import ApplicationList from "../Applications/ApplicationList.jsx";
 
 const CompanyDetails = ({ setHeader = () => {} }) => {
   const [company, setCompany] = useState(null);
@@ -30,22 +31,6 @@ const CompanyDetails = ({ setHeader = () => {} }) => {
     fetchCompany();
   }, [companyId]);
 
-  const fetchRelatedApplications = async () => {
-    try {
-      const { api } = await import("../../services/api.js");
-      const { data } = await api.get(`/applications?company=${companyId}`);
-      setRelatedApplications(data.data || []);
-    } catch (e) {
-      addError(e.message);
-    }
-  };
-
-  useEffect(() => {
-    if (companyId) {
-      fetchRelatedApplications();
-    }
-  }, [companyId]);
-
   const handleDeleteCompany = async () => {
     try {
       await deleteCompany(companyId);
@@ -61,7 +46,6 @@ const CompanyDetails = ({ setHeader = () => {} }) => {
     } catch (e) {
       addError(e.message);
     }
-    fetchRelatedApplications();
   };
 
   useEffect(() => {
@@ -79,60 +63,6 @@ const CompanyDetails = ({ setHeader = () => {} }) => {
 
   if (loading) return <LoadingSpinner />;
   if (!company?._id) return <h3>Company Not Found</h3>;
-
-  const applicationColumns = [
-    {
-      key: "title",
-      label: "Job Title",
-      sortable: true,
-      render: (row) => (
-        <Link to={`/applications/${row._id}`}>{row.title || "Untitled"}</Link>
-      ),
-    },
-    {
-      key: "status",
-      label: "Status",
-      render: (row) => (
-        <span className={`status status-${row.status?.toLowerCase()}`}>
-          {row.status}
-        </span>
-      ),
-      minWidth: 400,
-    },
-    {
-      key: "priority",
-      label: "Priority",
-      render: (row) => (
-        <span className={`priority priority-${row.priority?.toLowerCase()}`}>
-          {row.priority}
-        </span>
-      ),
-      minWidth: 600,
-    },
-    {
-      key: "source",
-      label: "Source",
-      render: (row) => row.source || "-",
-      minWidth: 800,
-    },
-    {
-      key: "updatedAt",
-      label: "Last Updated",
-      render: (row) =>
-        row.updatedAt ? new Date(row.updatedAt).toLocaleDateString() : "-",
-    },
-    {
-      key: "actions",
-      label: "Actions",
-      isActions: true,
-      render: (row, {tableWidth}) => (
-        <div className="actions">
-          <EditButton onClick={() => navigate(`/applications/${row._id}/edit`)} size={tableWidth < 500 ? "icon" : "xs"} />
-          <DeleteButton onClick={() => handleDeleteApplication(row._id)} size={tableWidth < 500 ? "icon" : "xs"} />
-        </div>
-      ),
-    },
-  ];
 
   return (
     <>
@@ -152,12 +82,9 @@ const CompanyDetails = ({ setHeader = () => {} }) => {
         ]}
       />
       <h2>Job Applications</h2>
-      <DataTable
-        columns={applicationColumns}
-        data={relatedApplications}
-        emptyState={<p>No applications for this company.</p>}
-        sortField="updatedAt"
-        sortDir="desc"
+      <ApplicationList
+        filterColumn="company"
+        filterId={companyId}
       />
     </>
   );

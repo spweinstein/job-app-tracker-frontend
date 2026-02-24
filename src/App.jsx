@@ -10,7 +10,7 @@ import RegisterForm from "./components/RegisterForm.jsx";
 import CoverLetterPage from "./components/CoverLetters/CoverLetterPage.jsx";
 import AppLayout from "./components/shared/layout/AppLayout/AppLayout.jsx";
 import "./components/shared/list/ListControls.css";
-
+import Dashboard from "./components/Dashboard/Dashboard.jsx";
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -26,7 +26,7 @@ function App() {
           path="/"
           element={<AppLayout sidebarOpen={sidebarOpen} onSidebarClose={closeSidebar} />}
         >
-          <Route index element={<h1>Landing</h1>} />
+          <Route index element={<Dashboard />} />
           <Route path="/companies/*"     element={<CompanyPage />} />
           <Route path="/applications/*"  element={<ApplicationPage />} />
           <Route path="/resumes/*"       element={<ResumePage />} />

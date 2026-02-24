@@ -8,6 +8,7 @@ import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
 import { BackButton, EditButton, DeleteButton, LoadingSpinner } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
+import ApplicationList from "../Applications/ApplicationList.jsx";
 
 const CoverLetterDetails = ({ setHeader = () => {} }) => {
   const [coverLetter, setCoverLetter] = useState(null);
@@ -67,6 +68,10 @@ const CoverLetterDetails = ({ setHeader = () => {} }) => {
           { label: "Body",  value: coverLetter.body  || null },
           { label: "Notes", value: coverLetter.notes || null },
         ]}
+      />
+      <ApplicationList
+        filterColumn="coverLetter"
+        filterId={coverLetterId}
       />
       <DocumentLineagePanel document={coverLetter} basePath="/cover-letters" />
     </>

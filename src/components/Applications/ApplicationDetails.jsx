@@ -14,6 +14,7 @@ const ApplicationDetails = ({setHeader = () => {}}) => {
   const [loading, setLoading] = useState(true);
   const {errors, addError, clearErrors} = useErrors();
   const { applicationId } = useParams();
+  const navigate = useNavigate();
 
   const handleDeleteClick = async () => {
     try {
@@ -38,7 +39,6 @@ const ApplicationDetails = ({setHeader = () => {}}) => {
     });
     }
   }, []);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchApplication = async () => {
@@ -99,6 +99,14 @@ const ApplicationDetails = ({setHeader = () => {}}) => {
                 {application.resume.name || "Resume"}
               </Link>
             ) : null,
+          },
+          {
+            label: "Cover Letter",
+            value: application.coverLetter?._id ? (
+              <Link to={`/cover-letters/${application.coverLetter._id}`}>
+                {application.coverLetter.name || "Cover Letter"}
+              </Link>
+            ) : null
           },
           {
             label: "Link",

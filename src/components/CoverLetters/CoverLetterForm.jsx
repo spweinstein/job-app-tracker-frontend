@@ -7,7 +7,7 @@ import {
   FormContainer,
   FormField,
 } from "../shared/forms/index.js";
-import { BackButton, SubmitButton } from "../shared/ui/index.js";
+import { BackButton, SubmitButton, CancelButton} from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
 const CoverLetterForm = ({ setHeader = () => {} }) => {

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { createApplication } from "../../services/applicationService.js";
 import { getCompanies } from "../../services/companyService.js";
 import { getResumes } from "../../services/resumeService.js";
+import { getCoverLetters } from "../../services/coverLetterService.js";
 import { useNavigate } from "react-router";
 import { FormRow, FormField, TextInput, SelectInput, DateInput, FormContainer } from "../shared/forms";
 import { PageContainer } from "../shared/layout";
@@ -43,6 +44,11 @@ const ApplicationForm = ({setHeader = () => {}}) => {
   const loadResumes = async (q) => {
     const res = await getResumes({ q, limit: 20, sort: "name", sortDir: "asc" });
     return res.data.map((r) => ({ label: r.name, value: r._id }));
+  };
+
+  const loadCoverLetters = async (q) => { 
+    const res = await getCoverLetters({ q, limit: 20, sort: "name", sortDir: "asc" });
+    return res.data.map((c) => ({ label: c.name, value: c._id }));
   };
 
   const handleChange = (e) => {
@@ -130,16 +136,26 @@ const ApplicationForm = ({setHeader = () => {}}) => {
             />
           </FormField>
         </FormRow>
-
-        <FormField label="Resume">
-          <SearchableSelect
-            name="resume"
-            value={formData.resume}
-            onChange={handleChange}
-            loadOptions={loadResumes}
-            required
-          />
-        </FormField>
+        <FormRow>
+          <FormField label="Resume">
+            <SearchableSelect
+              name="resume"
+              value={formData.resume}
+              onChange={handleChange}
+              loadOptions={loadResumes}
+              required
+            />
+          </FormField>
+          <FormField label="Cover Letter">
+            <SearchableSelect
+              name="coverLetter"
+              value={formData.coverLetter}
+              onChange={handleChange}
+              loadOptions={loadCoverLetters}
+              required
+            />
+          </FormField>
+        </FormRow>
         <div className="actions">
           <SubmitButton loading={submitting}>Add Application</SubmitButton>
           <CancelButton onClick={() => navigate(-1)} />

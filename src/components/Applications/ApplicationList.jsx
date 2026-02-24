@@ -11,7 +11,7 @@ import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
 import { ListPagination } from "../shared/list/ListPagination.jsx";
 
-const ApplicationList = ({setHeader = () => {}}) => {
+const ApplicationList = ({setHeader = () => {}, filterColumn, filterId, params = {}}) => {
   const navigate = useNavigate();
   useEffect(() => {
     if (setHeader && typeof setHeader === "function") {
@@ -36,7 +36,13 @@ const ApplicationList = ({setHeader = () => {}}) => {
     page,
     setPage,
     refresh,
-  } = usePaginatedQuery(getApplications, { defaultSort: "updatedAt" });
+  } = usePaginatedQuery(getApplications, { 
+    defaultSort: "updatedAt",
+    params: {
+      ...(filterColumn && filterId ? { [filterColumn]: filterId } : {}),
+      ...params
+    }
+   });
 
   const handleDelete = async (applicationId) => {
     try {
@@ -95,7 +101,7 @@ const ApplicationList = ({setHeader = () => {}}) => {
       key: "source",
       label: "Source",
       render: (row) => row.source || "-",
-      minWidth: 800,
+      minWidth: 900,
     },
     {
       key: "updatedAt",
@@ -103,6 +109,14 @@ const ApplicationList = ({setHeader = () => {}}) => {
       sortable: true,
       render: (row) =>
         row.updatedAt ? new Date(row.updatedAt).toLocaleDateString() : "-",
+      minWidth: 750,
+    },
+    {
+      key: "appliedAt",
+      label: "Applied",
+      sortable: true,
+      render: (row) =>
+        row.appliedAt ? new Date(row.appliedAt).toLocaleDateString() : "-",
     },
     {
       key: "actions",
@@ -140,7 +154,7 @@ const ApplicationList = ({setHeader = () => {}}) => {
         <LoadingSpinner />
       ) : (
         <DataTable
-          columns={columns}
+          columns={columns.filter(col=>!filterColumn || col.key !== filterColumn || col.value === filterId)}
           data={data}
           sortField={sortField}
           sortDir={sortDir}
@@ -148,7 +162,7 @@ const ApplicationList = ({setHeader = () => {}}) => {
           emptyState={<p>No applications found.</p>}
         />
       )}
-      
+
       <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
     {/* // </PageContainer> */}
     </>

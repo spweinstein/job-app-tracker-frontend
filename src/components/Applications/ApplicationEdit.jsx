@@ -6,6 +6,7 @@ import {
 } from "../../services/applicationService.js";
 import { getCompanies } from "../../services/companyService.js";
 import { getResumes } from "../../services/resumeService.js";
+import { getCoverLetters } from "../../services/coverLetterService.js";
 import { useNavigate, useParams } from "react-router";
 import { FormRow,FormField, TextInput, SelectInput, DateInput, FormContainer, SearchableSelect } from "../shared/forms";
 import { PageContainer } from "../shared/layout";
@@ -64,6 +65,11 @@ const ApplicationEdit = ({setHeader = () => {}}) => {
   const loadResumes = async (q) => {
     const res = await getResumes({ q, limit: 20, sort: "name", sortDir: "asc" });
     return res.data.map((r) => ({ label: r.name, value: r._id }));
+  };
+
+  const loadCoverLetters = async (q) => { 
+    const res = await getCoverLetters({ q, limit: 20, sort: "name", sortDir: "asc" });
+    return res.data.map((c) => ({ label: c.name, value: c._id }));
   };
 
   const handleChange = (e) => {
@@ -166,15 +172,24 @@ const ApplicationEdit = ({setHeader = () => {}}) => {
           </FormField>
         </FormRow>
 
-        <FormField label="Resume">
-          <SearchableSelect
-            name="resume"
-            value={formData.resume}
-            onChange={handleChange}
-            loadOptions={loadResumes}
-            required
-          />
-        </FormField>
+        <FormRow>
+          <FormField label="Resume">
+            <SearchableSelect
+              name="resume"
+              value={formData.resume}
+              onChange={handleChange}
+              loadOptions={loadResumes}
+            />
+          </FormField>
+          <FormField label="Cover Letter">
+            <SearchableSelect
+              name="coverLetter"
+              value={formData.coverLetter}
+              onChange={handleChange}
+              loadOptions={loadCoverLetters}
+            />
+          </FormField>
+        </FormRow>
         <div className="actions">
           <SubmitButton loading={submitting}>Edit Application</SubmitButton>
           <CancelButton onClick={() => navigate(-1)} />
