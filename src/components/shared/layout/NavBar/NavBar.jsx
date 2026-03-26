@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from "react-router";
 import { UserContext } from "../../../../contexts/UserContext.jsx";
 import "./NavBar.css";
 
-const NavBar = ({ sidebarOpen, onMenuToggle }) => {
+const NavBar = ({ sidebarOpen, onMenuToggle, chatOpen, onChatToggle }) => {
   const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
@@ -35,6 +35,21 @@ const NavBar = ({ sidebarOpen, onMenuToggle }) => {
       </div>
 
       <div className="navbar__right">
+      {user && (
+          <button
+            type="button"
+            className={
+              "navbar__link navbar__link--chat" +
+              (chatOpen ? " navbar__link--chat-active" : "")
+            }
+            onClick={onChatToggle}
+            aria-pressed={chatOpen}
+            aria-label={chatOpen ? "Hide assistant panel" : "Show assistant panel"}
+          >
+            AI Assistant
+          </button>
+        )}
+
         {user ? (
           <button className="navbar__link" onClick={handleLogout}>Logout</button>
         ) : (

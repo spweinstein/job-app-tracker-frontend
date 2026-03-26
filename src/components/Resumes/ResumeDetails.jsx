@@ -6,7 +6,7 @@ import { BackButton, EditButton, DeleteButton, LoadingSpinner } from "../shared/
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
 import ApplicationList from "../Applications/ApplicationList.jsx";
-
+import AIChatPanel from "../shared/layout/ChatPanel/AIChat.jsx";
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -221,6 +221,8 @@ const ResumeDetails = ({ setHeader = () => {} }) => {
         filterColumn="resume"
         filterId={resumeId}
       />
+
+      <AIChatPanel docType="resume" documentId={resumeId} />
 
       <DocumentLineagePanel document={resume} basePath="/resumes" />
     </>

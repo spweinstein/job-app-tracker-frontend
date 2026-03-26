@@ -1,44 +1,72 @@
 /* ── Base layout shell ── */
 .app-layout {
   min-height: calc(100vh - var(--navbar-height));
+  display: flex;
+  align-items: flex-start;
 }
 
-/* ── Two-column layout when sidebar is present ── */
-.app-layout--has-sidebar {
-  display: grid;
-  grid-template-columns: var(--sidebar-width) 1fr;
-  align-items: start;
-}
-
-/* ── Sidebar — desktop (always visible, in flow) ── */
+/* ── Left sidebar — desktop ── */
 .left-sidebar {
-  grid-column: 1;
   background: var(--bg-dark);
   min-height: calc(100vh - var(--navbar-height));
   position: sticky;
   top: var(--navbar-height);
   height: calc(100vh - var(--navbar-height));
   overflow-y: auto;
-  border-right: 1px solid rgba(255,255,255,0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: var(--shadow-sidebar);
-  /* custom scrollbar */
   scrollbar-width: thin;
   scrollbar-color: var(--bg-dark-raised) transparent;
+  flex: 0 0 var(--sidebar-width);
 }
 
-/* ── Overlay backdrop — hidden on desktop ── */
+/* ── Right sidebar (chat) — desktop ── */
+.right-sidebar {
+  /* ✅ put the “good” styles here, OUTSIDE any @media */
+  background: var(--bg-dark);
+  min-height: calc(100vh - var(--navbar-height));
+  position: sticky;
+  top: var(--navbar-height);
+  height: calc(100vh - var(--navbar-height));
+  overflow-y: auto;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: var(--shadow-sidebar);
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-dark-raised) transparent;
+
+  /* collapsed by default; expands when .right-sidebar--open is present */
+  flex: 0 0 0;
+  max-width: 0;
+  opacity: 0;
+  transition:
+    flex-basis var(--transition-slow),
+    max-width var(--transition-slow),
+    opacity var(--transition-slow);
+}
+
+.right-sidebar--open {
+  flex-basis: var(--chat-sidebar-width, 320px);
+  max-width: 360px;
+  opacity: 1;
+}
+
+/* ── Main content panel ── */
+.app-layout > :not(.left-sidebar):not(.right-sidebar):not(.sidebar-overlay) {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ── Desktop: no overlay ── */
 .sidebar-overlay {
   display: none;
 }
 
 /* ── Mobile breakpoint ── */
 @media (max-width: 768px) {
-  /* Stack single-column on mobile */
-  .app-layout--has-sidebar {
-    grid-template-columns: 1fr;
+  .app-layout {
+    flex-direction: column;
   }
 
-  /* Sidebar becomes a fixed off-canvas drawer */
   .left-sidebar {
     position: fixed;
     top: var(--navbar-height);
@@ -48,7 +76,7 @@
     z-index: 150;
     transform: translateX(-100%);
     transition: transform var(--transition-slow);
-    grid-column: unset;
+    flex: 0 0 auto;
   }
 
   .left-sidebar--open {
@@ -56,7 +84,26 @@
     box-shadow: var(--shadow-sidebar), var(--shadow-glow);
   }
 
-  /* Overlay backdrop */
+  /* 📌 Only override what’s needed for the drawer behavior */
+  .right-sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    right: 0;
+    height: calc(100vh - var(--navbar-height));
+    width: var(--chat-sidebar-width, 320px);
+    z-index: 150;
+    transform: translateX(100%);
+    flex: 0 0 auto;
+    max-width: none;
+    opacity: 1; /* visibility by transform on mobile */
+    transition: transform var(--transition-slow);
+  }
+
+  .right-sidebar--open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-sidebar), var(--shadow-glow);
+  }
+
   .sidebar-overlay {
     display: block;
     position: fixed;

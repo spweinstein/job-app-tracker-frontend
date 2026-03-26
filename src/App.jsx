@@ -14,17 +14,20 @@ import Dashboard from "./components/Dashboard/Dashboard.jsx";
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  const [chatOpen, setChatOpen] = useState(false);
   const toggleSidebar = () => setSidebarOpen((o) => !o);
   const closeSidebar  = () => setSidebarOpen(false);
 
+  const toggleChat = () => setChatOpen((o) => !o);
+  const closeChat = () => setChatOpen(false);
+
   return (
     <>
-      <NavBar sidebarOpen={sidebarOpen} onMenuToggle={toggleSidebar} />
+      <NavBar sidebarOpen={sidebarOpen} onMenuToggle={toggleSidebar} chatOpen={chatOpen} onChatToggle={toggleChat} />
       <Routes>
         <Route
           path="/"
-          element={<AppLayout sidebarOpen={sidebarOpen} onSidebarClose={closeSidebar} />}
+          element={<AppLayout sidebarOpen={sidebarOpen} onSidebarClose={closeSidebar} chatOpen={chatOpen} onChatClose={closeChat} />}
         >
           <Route index element={<Dashboard />} />
           <Route path="/companies/*"     element={<CompanyPage />} />

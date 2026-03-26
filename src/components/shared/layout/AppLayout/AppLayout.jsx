@@ -1,30 +1,61 @@
 import { useContext } from "react";
 import { Outlet } from "react-router";
 import AppSidebar from "../AppSidebar/AppSidebar.jsx";
+import ChatPanel from "../ChatPanel/ChatPanel.jsx";
 import "./AppLayout.css";
 import { UserContext } from "../../../../contexts/UserContext.jsx";
 
-const AppLayout = ({ sidebarOpen, onSidebarClose }) => {
+const AppLayout = ({
+  sidebarOpen,
+  onSidebarClose,
+  chatOpen,
+  onChatClose,
+}) => {
   const { user } = useContext(UserContext);
 
   return (
-    <div className={`app-layout${user ? " app-layout--has-sidebar" : ""}`}>
+    <div
+      className={
+        "app-layout" +
+        (user ? " app-layout--has-sidebar" : "") +
+        (chatOpen ? " app-layout--has-chat" : "")
+      }
+    >
       {user && (
         <>
-          {/* Translucent overlay — mobile only */}
+          {/* Left sidebar (nav) */}
           <div
-            className={`sidebar-overlay${sidebarOpen ? " sidebar-overlay--visible" : ""}`}
+            className={
+              "sidebar-overlay" +
+              (sidebarOpen ? " sidebar-overlay--visible" : "")
+            }
             onClick={onSidebarClose}
             aria-hidden="true"
           />
 
-          <aside className={`left-sidebar${sidebarOpen ? " left-sidebar--open" : ""}`}>
+          <aside
+            className={
+              "left-sidebar" + (sidebarOpen ? " left-sidebar--open" : "")
+            }
+          >
             <AppSidebar onNavigate={onSidebarClose} />
+          </aside>
+
+          <main className="app-layout__main">
+            <Outlet />
+          </main>
+
+          {/* Right sidebar (global chat) */}
+          <aside
+            className={
+              "right-sidebar" + (chatOpen ? " right-sidebar--open" : "")
+            }
+          >
+            <ChatPanel onClose={onChatClose} />
           </aside>
         </>
       )}
 
-      <Outlet />
     </div>
   );
 };

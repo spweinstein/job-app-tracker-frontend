@@ -9,7 +9,7 @@ import { BackButton, EditButton, DeleteButton, LoadingSpinner } from "../shared/
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
 import ApplicationList from "../Applications/ApplicationList.jsx";
-
+import AIChatPanel from "../shared/layout/ChatPanel/AIChat.jsx";
 const CoverLetterDetails = ({ setHeader = () => {} }) => {
   const [coverLetter, setCoverLetter] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -73,6 +73,7 @@ const CoverLetterDetails = ({ setHeader = () => {} }) => {
         filterColumn="coverLetter"
         filterId={coverLetterId}
       />
+      <AIChatPanel docType="cover_letter" documentId={coverLetterId} />
       <DocumentLineagePanel document={coverLetter} basePath="/cover-letters" />
     </>
   );
