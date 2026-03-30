@@ -6,7 +6,7 @@ import CoverLetterDetails from "./CoverLetterDetails.jsx";
 import CoverLetterForm from "./CoverLetterForm.jsx";
 import CoverLetterEdit from "./CoverLetterEdit.jsx";
 
-const CoverLetterPage = () => {
+const CoverLetterPage = ({ isAiAssistantEnabled }) => {
   const [title, setTitle] = useState("");
   const [actions, setActions] = useState(null);
   const [errors, setErrors] = useState([]);
@@ -21,9 +21,23 @@ const CoverLetterPage = () => {
     <PageContainer title={title} actions={actions} errors={errors}>
       <Routes>
         <Route index element={<CoverLetterList setHeader={setHeader} />} />
-        <Route path="/new" element={<CoverLetterForm setHeader={setHeader} />} />
-        <Route path="/:coverLetterId/edit" element={<CoverLetterEdit setHeader={setHeader} />} />
-        <Route path="/:coverLetterId" element={<CoverLetterDetails setHeader={setHeader} />} />
+        <Route
+          path="/new"
+          element={<CoverLetterForm setHeader={setHeader} />}
+        />
+        <Route
+          path="/:coverLetterId/edit"
+          element={<CoverLetterEdit setHeader={setHeader} />}
+        />
+        <Route
+          path="/:coverLetterId"
+          element={
+            <CoverLetterDetails
+              setHeader={setHeader}
+              isAiAssistantEnabled={isAiAssistantEnabled}
+            />
+          }
+        />
       </Routes>
     </PageContainer>
   );

@@ -6,7 +6,7 @@ import ResumeDetails from "./ResumeDetails.jsx";
 import ResumeForm from "./ResumeForm.jsx";
 import ResumeEdit from "./ResumeEdit.jsx";
 
-const ResumePage = () => {
+const ResumePage = ({ isAiAssistantEnabled }) => {
   const [title, setTitle] = useState("");
   const [actions, setActions] = useState(null);
   const [errors, setErrors] = useState([]);
@@ -23,7 +23,7 @@ const ResumePage = () => {
         <Route index element={<ResumeList setHeader={setHeader} />} />
         <Route path="/new" element={<ResumeForm setHeader={setHeader} />} />
         <Route path="/:resumeId/edit" element={<ResumeEdit setHeader={setHeader} />} />
-        <Route path="/:resumeId" element={<ResumeDetails setHeader={setHeader} />} />
+        <Route path="/:resumeId" element={<ResumeDetails setHeader={setHeader} isAiAssistantEnabled={isAiAssistantEnabled} />} />
       </Routes>
     </PageContainer>
   );

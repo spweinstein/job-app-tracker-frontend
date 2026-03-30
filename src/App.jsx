@@ -13,29 +13,45 @@ import "./components/shared/list/ListControls.css";
 import Dashboard from "./components/Dashboard/Dashboard.jsx";
 
 function App() {
+  const isAiAssistantEnabled =
+    import.meta.env.VITE_AI_ASSISTANT_ENABLED === "true";
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const toggleSidebar = () => setSidebarOpen((o) => !o);
-  const closeSidebar  = () => setSidebarOpen(false);
+  const closeSidebar = () => setSidebarOpen(false);
 
   const toggleChat = () => setChatOpen((o) => !o);
   const closeChat = () => setChatOpen(false);
 
   return (
     <>
-      <NavBar sidebarOpen={sidebarOpen} onMenuToggle={toggleSidebar} chatOpen={chatOpen} onChatToggle={toggleChat} />
+      <NavBar
+        sidebarOpen={sidebarOpen}
+        onMenuToggle={toggleSidebar}
+        chatOpen={chatOpen}
+        onChatToggle={toggleChat}
+        isAiAssistantEnabled={isAiAssistantEnabled}
+      />
       <Routes>
         <Route
           path="/"
-          element={<AppLayout sidebarOpen={sidebarOpen} onSidebarClose={closeSidebar} chatOpen={chatOpen} onChatClose={closeChat} />}
+          element={
+            <AppLayout
+              isAiAssistantEnabled={isAiAssistantEnabled}
+              sidebarOpen={sidebarOpen}
+              onSidebarClose={closeSidebar}
+              chatOpen={chatOpen}
+              onChatClose={closeChat}
+            />
+          }
         >
           <Route index element={<Dashboard />} />
-          <Route path="/companies/*"     element={<CompanyPage />} />
-          <Route path="/applications/*"  element={<ApplicationPage />} />
-          <Route path="/resumes/*"       element={<ResumePage />} />
+          <Route path="/companies/*" element={<CompanyPage />} />
+          <Route path="/applications/*" element={<ApplicationPage />} />
+          <Route path="/resumes/*" element={<ResumePage />} />
           <Route path="/cover-letters/*" element={<CoverLetterPage />} />
         </Route>
-        <Route path="/login"    element={<LoginForm />} />
+        <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
       </Routes>
     </>

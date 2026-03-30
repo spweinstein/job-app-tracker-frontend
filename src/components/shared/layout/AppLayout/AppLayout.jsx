@@ -10,6 +10,7 @@ const AppLayout = ({
   onSidebarClose,
   chatOpen,
   onChatClose,
+  isAiAssistantEnabled,
 }) => {
   const { user } = useContext(UserContext);
 
@@ -18,7 +19,7 @@ const AppLayout = ({
       className={
         "app-layout" +
         (user ? " app-layout--has-sidebar" : "") +
-        (chatOpen ? " app-layout--has-chat" : "")
+        (chatOpen && isAiAssistantEnabled ? " app-layout--has-chat" : "")
       }
     >
       {user && (
@@ -46,16 +47,17 @@ const AppLayout = ({
           </main>
 
           {/* Right sidebar (global chat) */}
-          <aside
-            className={
-              "right-sidebar" + (chatOpen ? " right-sidebar--open" : "")
-            }
-          >
-            <ChatPanel onClose={onChatClose} />
-          </aside>
+          {isAiAssistantEnabled && (
+            <aside
+              className={
+                "right-sidebar" + (chatOpen ? " right-sidebar--open" : "")
+              }
+            >
+              <ChatPanel onClose={onChatClose} />
+            </aside>
+          )}
         </>
       )}
-
     </div>
   );
 };

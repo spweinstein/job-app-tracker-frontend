@@ -15,7 +15,7 @@ const formatDate = (dateStr) => {
   });
 };
 
-const ResumeDetails = ({ setHeader = () => {} }) => {
+const ResumeDetails = ({ setHeader = () => {}, isAiAssistantEnabled }) => {
   const {errors, addError, clearErrors} = useErrors();
   const [resume, setResume] = useState({ _id: null });
   const { resumeId } = useParams();
@@ -222,7 +222,7 @@ const ResumeDetails = ({ setHeader = () => {} }) => {
         filterId={resumeId}
       />
 
-      <AIChatPanel docType="resume" documentId={resumeId} />
+      {isAiAssistantEnabled && <AIChatPanel docType="resume" documentId={resumeId} />}
 
       <DocumentLineagePanel document={resume} basePath="/resumes" />
     </>

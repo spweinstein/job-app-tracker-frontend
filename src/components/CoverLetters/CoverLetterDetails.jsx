@@ -5,15 +5,20 @@ import {
 } from "../../services/coverLetterService.js";
 import { useParams, useNavigate } from "react-router";
 import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
-import { BackButton, EditButton, DeleteButton, LoadingSpinner } from "../shared/ui/index.js";
+import {
+  BackButton,
+  EditButton,
+  DeleteButton,
+  LoadingSpinner,
+} from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
 import ApplicationList from "../Applications/ApplicationList.jsx";
 import AIChatPanel from "../shared/layout/ChatPanel/AIChat.jsx";
-const CoverLetterDetails = ({ setHeader = () => {} }) => {
+const CoverLetterDetails = ({ setHeader = () => {}, isAiAssistantEnabled }) => {
   const [coverLetter, setCoverLetter] = useState(null);
   const [loading, setLoading] = useState(true);
-  const {errors, addError, clearErrors} = useErrors();
+  const { errors, addError, clearErrors } = useErrors();
   const { coverLetterId } = useParams();
   const navigate = useNavigate();
 
@@ -46,34 +51,39 @@ const CoverLetterDetails = ({ setHeader = () => {} }) => {
       actions: (
         <>
           <BackButton onClick={() => navigate(-1)} />
-          <EditButton onClick={() => navigate(`/cover-letters/${coverLetterId}/edit`)} />
+          <EditButton
+            onClick={() => navigate(`/cover-letters/${coverLetterId}/edit`)}
+          />
           <DeleteButton onClick={handleDeleteClick} />
         </>
       ),
     });
   }, [coverLetterId]);
 
-    if (loading) return <LoadingSpinner />;
+  if (loading) return <LoadingSpinner />;
   if (!coverLetter?._id) return <h3>Cover Letter Not Found</h3>;
 
   return (
     <>
       {errors.length > 0 && (
-        <div id="error-message">{errors.map((e) => <p key={e}>{e}</p>)}</div>
+        <div id="error-message">
+          {errors.map((e) => (
+            <p key={e}>{e}</p>
+          ))}
+        </div>
       )}
       <DetailsCard
-        title={{ label: "Name",    value: coverLetter.name }}
+        title={{ label: "Name", value: coverLetter.name }}
         subtitle={{ label: "Version", value: `v${coverLetter.version || "0"}` }}
         fields={[
-          { label: "Body",  value: coverLetter.body  || null },
+          { label: "Body", value: coverLetter.body || null },
           { label: "Notes", value: coverLetter.notes || null },
         ]}
       />
-      <ApplicationList
-        filterColumn="coverLetter"
-        filterId={coverLetterId}
-      />
-      <AIChatPanel docType="cover_letter" documentId={coverLetterId} />
+      <ApplicationList filterColumn="coverLetter" filterId={coverLetterId} />
+      {isAiAssistantEnabled && (
+        <AIChatPanel docType="cover_letter" documentId={coverLetterId} />
+      )}
       <DocumentLineagePanel document={coverLetter} basePath="/cover-letters" />
     </>
   );

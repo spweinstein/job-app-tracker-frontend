@@ -3,7 +3,13 @@ import { NavLink, useNavigate } from "react-router";
 import { UserContext } from "../../../../contexts/UserContext.jsx";
 import "./NavBar.css";
 
-const NavBar = ({ sidebarOpen, onMenuToggle, chatOpen, onChatToggle }) => {
+const NavBar = ({
+  sidebarOpen,
+  onMenuToggle,
+  chatOpen,
+  onChatToggle,
+  isAiAssistantEnabled,
+}) => {
   const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
@@ -35,7 +41,7 @@ const NavBar = ({ sidebarOpen, onMenuToggle, chatOpen, onChatToggle }) => {
       </div>
 
       <div className="navbar__right">
-      {user && (
+        {user && isAiAssistantEnabled && (
           <button
             type="button"
             className={
@@ -44,18 +50,26 @@ const NavBar = ({ sidebarOpen, onMenuToggle, chatOpen, onChatToggle }) => {
             }
             onClick={onChatToggle}
             aria-pressed={chatOpen}
-            aria-label={chatOpen ? "Hide assistant panel" : "Show assistant panel"}
+            aria-label={
+              chatOpen ? "Hide assistant panel" : "Show assistant panel"
+            }
           >
             AI Assistant
           </button>
         )}
 
         {user ? (
-          <button className="navbar__link" onClick={handleLogout}>Logout</button>
+          <button className="navbar__link" onClick={handleLogout}>
+            Logout
+          </button>
         ) : (
           <>
-            <NavLink to="/login"    className="navbar__link">Login</NavLink>
-            <NavLink to="/register" className="navbar__link navbar__link--cta">Register</NavLink>
+            <NavLink to="/login" className="navbar__link">
+              Login
+            </NavLink>
+            <NavLink to="/register" className="navbar__link navbar__link--cta">
+              Register
+            </NavLink>
           </>
         )}
       </div>
