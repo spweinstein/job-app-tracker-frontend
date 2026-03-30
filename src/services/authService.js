@@ -2,10 +2,9 @@ import { api } from "./api.js";
 
 export const register = async (formData) => {
   try {
-    console.log(formData, "register");
     const { data } = await api.post("/auth/register", formData);
-    if (data.err) {
-      throw new Error(data.err);
+    if (data.error) {
+      throw new Error(data.error);
     }
     if (data.token) {
       // store token in localStorage
@@ -22,8 +21,8 @@ export const register = async (formData) => {
 export const login = async (formData) => {
   try {
     const { data } = await api.post("/auth/login", formData);
-    if (data.err) {
-      throw new Error(data.err);
+    if (data.error) {
+      throw new Error(data.error);
     }
     if (data.token) {
       // store token in localStorage
@@ -33,6 +32,6 @@ export const login = async (formData) => {
     }
     throw new Error("Invalid response from server");
   } catch (e) {
-    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
+    throw e.response?.data?.error ? new Error(e.response.data.error) : e;
   }
 };

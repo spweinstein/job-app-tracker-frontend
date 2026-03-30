@@ -3,7 +3,7 @@ import {
   getCoverLetter,
   deleteCoverLetter,
 } from "../../services/coverLetterService.js";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, useOutletContext } from "react-router";
 import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
 import {
   BackButton,
@@ -15,7 +15,8 @@ import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
 import ApplicationList from "../Applications/ApplicationList.jsx";
 import AIChatPanel from "../shared/layout/ChatPanel/AIChat.jsx";
-const CoverLetterDetails = ({ setHeader = () => {}, isAiAssistantEnabled }) => {
+const CoverLetterDetails = ({ isAiAssistantEnabled }) => {
+  const { setHeader = () => {} } = useOutletContext() ?? {};
   const [coverLetter, setCoverLetter] = useState(null);
   const [loading, setLoading] = useState(true);
   const { errors, addError, clearErrors } = useErrors();

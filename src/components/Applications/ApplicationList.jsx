@@ -3,23 +3,21 @@ import {
   deleteApplication,
   getApplications,
 } from "../../services/applicationService.js";
-import { Link, useNavigate } from "react-router";
-import { PageContainer } from "../shared/layout/index.js";
+import { Link, useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "../shared/views/index.js";
 import { DeleteButton, EditButton, LoadingSpinner } from "../shared/ui/index.js";
 import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
 import { ListPagination } from "../shared/list/ListPagination.jsx";
 
-const ApplicationList = ({setHeader = () => {}, filterColumn, filterId, params = {}}) => {
+const ApplicationList = ({ filterColumn, filterId, params = {} }) => {
+  const { setHeader = () => {} } = useOutletContext() ?? {};
   const navigate = useNavigate();
   useEffect(() => {
-    if (setHeader && typeof setHeader === "function") {
     setHeader({
       title: "Applications",
       actions: <Link to="/applications/new" className="btn btn-lg btn-primary">Create</Link>,
     });
-    }
   }, []);
 
   const {

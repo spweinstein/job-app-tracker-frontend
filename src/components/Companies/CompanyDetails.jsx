@@ -8,11 +8,13 @@ import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
 import useErrors from "../../hooks/useErrors.js";
 import { LoadingSpinner } from "../shared/ui/index.js";
 import ApplicationList from "../Applications/ApplicationList.jsx";
+import { useOutletContext } from "react-router";
 
-const CompanyDetails = ({ setHeader = () => {} }) => {
+const CompanyDetails = () => {
+  const { setHeader } = useOutletContext();
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
-  const {errors, addError, clearErrors} = useErrors();
+  const { errors, addError, clearErrors } = useErrors();
   const [relatedApplications, setRelatedApplications] = useState([]);
   const { companyId } = useParams();
   const navigate = useNavigate();
@@ -54,7 +56,9 @@ const CompanyDetails = ({ setHeader = () => {} }) => {
       actions: (
         <>
           <BackButton onClick={() => navigate(-1)} />
-          <EditButton onClick={() => navigate(`/companies/${companyId}/edit`)} />
+          <EditButton
+            onClick={() => navigate(`/companies/${companyId}/edit`)}
+          />
           <DeleteButton onClick={handleDeleteCompany} />
         </>
       ),
@@ -67,25 +71,29 @@ const CompanyDetails = ({ setHeader = () => {} }) => {
   return (
     <>
       {errors.length > 0 && (
-        <div id="error-message">{errors.map((e) => <p key={e}>{e}</p>)}</div>
+        <div id="error-message">
+          {errors.map((e) => (
+            <p key={e}>{e}</p>
+          ))}
+        </div>
       )}
       <DetailsCard
         title={{ label: "Company", value: company.name }}
         fields={[
-          { label: "Website", value: company.url ? (
-            <a href={company.url} target="_blank" rel="noopener noreferrer">
-              {company.url}
-            </a>
-          ) : null },
+          {
+            label: "Website",
+            value: company.url ? (
+              <a href={company.url} target="_blank" rel="noopener noreferrer">
+                {company.url}
+              </a>
+            ) : null,
+          },
           { label: "Description", value: company.description || null },
-          { label: "Notes",       value: company.notes       || null },
+          { label: "Notes", value: company.notes || null },
         ]}
       />
       <h2>Job Applications</h2>
-      <ApplicationList
-        filterColumn="company"
-        filterId={companyId}
-      />
+      <ApplicationList filterColumn="company" filterId={companyId} />
     </>
   );
 };

@@ -3,13 +3,14 @@ import {
   getApplication,
   deleteApplication,
 } from "../../services/applicationService.js";
-import { useParams, useNavigate, Link } from "react-router";
+import { useParams, useNavigate, Link, useOutletContext } from "react-router";
 import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
 import { DeleteButton, EditButton, BackButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import { LoadingSpinner } from "../shared/ui/index.js";
 
-const ApplicationDetails = ({setHeader = () => {}}) => {
+const ApplicationDetails = () => {
+  const { setHeader = () => {} } = useOutletContext() ?? {};
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const {errors, addError, clearErrors} = useErrors();
@@ -26,7 +27,6 @@ const ApplicationDetails = ({setHeader = () => {}}) => {
   };
 
   useEffect(() => {
-    if (setHeader && typeof setHeader === "function") {
     setHeader({
       title: "Application Details",
       // Back, Edit, and Delete buttons
@@ -37,7 +37,6 @@ const ApplicationDetails = ({setHeader = () => {}}) => {
         <DeleteButton onClick={handleDeleteClick} />
       </>
     });
-    }
   }, []);
 
   useEffect(() => {

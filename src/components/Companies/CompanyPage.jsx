@@ -1,10 +1,5 @@
-import CompanyList from "./CompanyList.jsx";
 import { useState } from "react";
-import CompanyDetails from "./CompanyDetails.jsx";
-import CompanyForm from "./CompanyForm.jsx";
-import CompanyEdit from "./CompanyEdit.jsx";
-
-import { Routes, Route } from "react-router";
+import { Outlet } from "react-router";
 import { PageContainer } from "../shared/layout/index.js";
 
 const CompanyPage = () => {
@@ -19,12 +14,7 @@ const CompanyPage = () => {
   };
   return (
     <PageContainer title={title} actions={actions} errors={errors}>
-    <Routes>  
-      <Route index element={<CompanyList setHeader={setHeader} />} />
-      <Route path="/:companyId/edit" element={<CompanyEdit setHeader={setHeader} />} />
-      <Route path="/:companyId" element={<CompanyDetails setHeader={setHeader} />} />
-      <Route path="/new" element={<CompanyForm setHeader={setHeader} />} />
-    </Routes>
+      <Outlet context={{ setHeader }} />
     </PageContainer>
   );
 };

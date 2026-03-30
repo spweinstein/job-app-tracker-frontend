@@ -3,14 +3,15 @@ import { createApplication } from "../../services/applicationService.js";
 import { getCompanies } from "../../services/companyService.js";
 import { getResumes } from "../../services/resumeService.js";
 import { getCoverLetters } from "../../services/coverLetterService.js";
-import { useNavigate } from "react-router";
+import { useNavigate, useOutletContext } from "react-router";
 import { FormRow, FormField, TextInput, SelectInput, DateInput, FormContainer } from "../shared/forms";
 import { PageContainer } from "../shared/layout";
 import useErrors from "../../hooks/useErrors.js";
 import { SearchableSelect } from "../shared/forms";
 import { BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 
-const ApplicationForm = ({setHeader = () => {}}) => {
+const ApplicationForm = () => {
+  const { setHeader = () => {} } = useOutletContext() ?? {};
   const {errors, addError, clearErrors} = useErrors();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,8 +24,9 @@ const ApplicationForm = ({setHeader = () => {}}) => {
     appliedAt: new Date().toISOString().split("T")[0],
     url: "",
   });
+  const navigate = useNavigate();
+
   useEffect(() => {
-    if (setHeader && typeof setHeader === "function") {
     setHeader({
       title: "New Application",
       // Back button
@@ -32,9 +34,7 @@ const ApplicationForm = ({setHeader = () => {}}) => {
       <BackButton onClick={() => navigate(-1)} />
       </>,
     });
-    }
   }, []);
-  const navigate = useNavigate();
 
   const loadCompanies = async (q) => {
     const res = await getCompanies({ q, limit: 20, sort: "name", sortDir: "asc" });

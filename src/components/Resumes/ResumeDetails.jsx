@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getResume, deleteResume } from "../../services/resumeService.js";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, useOutletContext } from "react-router";
 import "./Resume.css";
 import { BackButton, EditButton, DeleteButton, LoadingSpinner } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
@@ -15,7 +15,8 @@ const formatDate = (dateStr) => {
   });
 };
 
-const ResumeDetails = ({ setHeader = () => {}, isAiAssistantEnabled }) => {
+const ResumeDetails = ({ isAiAssistantEnabled }) => {
+  const { setHeader = () => {} } = useOutletContext() ?? {};
   const {errors, addError, clearErrors} = useErrors();
   const [resume, setResume] = useState({ _id: null });
   const { resumeId } = useParams();

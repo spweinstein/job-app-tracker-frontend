@@ -1,10 +1,6 @@
 import { useState } from "react";
-import { Routes, Route } from "react-router";
-import ApplicationList from "./ApplicationList.jsx";
-import ApplicationDetails from "./ApplicationDetails.jsx";
-import ApplicationForm from "./ApplicationForm.jsx";
-import ApplicationEdit from "./ApplicationEdit.jsx";
-import PageContainer from "../shared/layout/PageContainer/PageContainer.jsx";
+import { Outlet } from "react-router";
+import { PageContainer } from "../shared/layout/index.js";
 
 const ApplicationPage = () => {
   const [title, setTitle] = useState("");
@@ -19,12 +15,7 @@ const ApplicationPage = () => {
 
   return (
     <PageContainer title={title} actions={actions} errors={errors}>
-      <Routes>
-        <Route index element={<ApplicationList setHeader={setHeader} />} />
-        <Route path="/new" element={<ApplicationForm setHeader={setHeader} />} />
-        <Route path="/:applicationId/edit" element={<ApplicationEdit setHeader={setHeader} />} />
-        <Route path="/:applicationId" element={<ApplicationDetails setHeader={setHeader} />} />
-      </Routes>
+      <Outlet context={{ setHeader }} />
     </PageContainer>
   );
 };

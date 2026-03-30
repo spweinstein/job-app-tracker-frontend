@@ -5,7 +5,7 @@ import {
   deleteResume,
 } from "../../services/resumeService.js";
 import { getCompanies } from "../../services/companyService.js";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useOutletContext } from "react-router";
 import {
   FormField,
   TextInput,
@@ -55,7 +55,8 @@ const loadCompanies = async (q) => {
   return res.data.map((c) => ({ label: c.name, value: c._id }));
 };
 
-const ResumeEdit = ({ setHeader = () => {} }) => {
+const ResumeEdit = () => {
+  const { setHeader = () => {} } = useOutletContext() ?? {};
   const {errors, addError, clearErrors} = useErrors();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({

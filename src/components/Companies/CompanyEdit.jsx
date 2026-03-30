@@ -5,12 +5,25 @@ import {
   deleteCompany,
 } from "../../services/companyService";
 import { useNavigate, useParams } from "react-router";
-import { FormRow, FormField, TextInput, FormContainer, TextAreaInput } from "../shared/forms";
-import { DeleteButton, BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
+import {
+  FormRow,
+  FormField,
+  TextInput,
+  FormContainer,
+  TextAreaInput,
+} from "../shared/forms";
+import {
+  DeleteButton,
+  BackButton,
+  SubmitButton,
+  CancelButton,
+} from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
+import { useOutletContext } from "react-router";
 
-const CompanyEdit = ({ setHeader = () => {} }) => {
-  const {errors, addError, clearErrors} = useErrors();
+const CompanyEdit = () => {
+  const { setHeader } = useOutletContext();
+  const { errors, addError, clearErrors } = useErrors();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -77,7 +90,11 @@ const CompanyEdit = ({ setHeader = () => {} }) => {
   }, [companyId]);
 
   return (
-    <FormContainer className="crud-form" onSubmit={handleSubmit} errors={errors}>
+    <FormContainer
+      className="crud-form"
+      onSubmit={handleSubmit}
+      errors={errors}
+    >
       <FormRow>
         <FormField label="Name">
           <TextInput

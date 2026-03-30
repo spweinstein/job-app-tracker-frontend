@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createCoverLetter, getCoverLetter } from "../../services/coverLetterService.js";
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate, useSearchParams, useOutletContext } from "react-router";
 import {
   TextInput,
   TextAreaInput,
@@ -10,7 +10,8 @@ import {
 import { BackButton, SubmitButton, CancelButton} from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
-const CoverLetterForm = ({ setHeader = () => {} }) => {
+const CoverLetterForm = () => {
+  const { setHeader = () => {} } = useOutletContext() ?? {};
   const {errors, addError, clearErrors} = useErrors();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({

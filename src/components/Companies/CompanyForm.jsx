@@ -1,12 +1,20 @@
 import { useState, useEffect } from "react";
 import { createCompany } from "../../services/companyService";
 import { useNavigate } from "react-router";
-import { FormRow, FormField, TextInput, TextAreaInput, FormContainer } from "../shared/forms";
+import {
+  FormRow,
+  FormField,
+  TextInput,
+  TextAreaInput,
+  FormContainer,
+} from "../shared/forms";
 import useErrors from "../../hooks/useErrors.js";
 import { BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
+import { useOutletContext } from "react-router";
 
-const CompanyForm = ({ setHeader = () => {} }) => {
-  const {errors, addError, clearErrors} = useErrors();
+const CompanyForm = () => {
+  const { setHeader } = useOutletContext();
+  const { errors, addError, clearErrors } = useErrors();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -43,7 +51,11 @@ const CompanyForm = ({ setHeader = () => {} }) => {
   };
 
   return (
-    <FormContainer className="crud-form" onSubmit={handleSubmit} errors={errors}>
+    <FormContainer
+      className="crud-form"
+      onSubmit={handleSubmit}
+      errors={errors}
+    >
       <FormRow>
         <FormField label="Name">
           <TextInput

@@ -7,13 +7,14 @@ import {
 import { getCompanies } from "../../services/companyService.js";
 import { getResumes } from "../../services/resumeService.js";
 import { getCoverLetters } from "../../services/coverLetterService.js";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useOutletContext } from "react-router";
 import { FormRow,FormField, TextInput, SelectInput, DateInput, FormContainer, SearchableSelect } from "../shared/forms";
 import { PageContainer } from "../shared/layout";
 import { DeleteButton, BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 
-const ApplicationEdit = ({setHeader = () => {}}) => {
+const ApplicationEdit = () => {
+  const { setHeader = () => {} } = useOutletContext() ?? {};
   const {errors, addError, clearErrors} = useErrors();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -26,8 +27,10 @@ const ApplicationEdit = ({setHeader = () => {}}) => {
     appliedAt: "",
     url: "",
   });
+  const { applicationId } = useParams();
+  const navigate = useNavigate();
+
   useEffect(() => {
-    if (setHeader && typeof setHeader === "function") {
     setHeader({
       title: "Edit Application",
       actions: <>
@@ -35,10 +38,7 @@ const ApplicationEdit = ({setHeader = () => {}}) => {
         <DeleteButton onClick={handleDeleteClick} />
       </>,
     });
-    }
   }, []);
-  const { applicationId } = useParams();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {

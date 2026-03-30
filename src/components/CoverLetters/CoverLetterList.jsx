@@ -3,7 +3,7 @@ import {
   getCoverLetters,
   deleteCoverLetter,
 } from "../../services/coverLetterService.js";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "../shared/views/index.js";
 import { DeleteButton, EditButton, LoadingSpinner } from "../shared/ui/index.js";
 import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
@@ -11,7 +11,8 @@ import { ListSearch } from "../shared/list/ListSearch.jsx";
 import { ListPagination } from "../shared/list/ListPagination.jsx";
 
 
-const CoverLetterList = ({ setHeader = () => {} }) => {
+const CoverLetterList = () => {
+  const { setHeader = () => {} } = useOutletContext() ?? {};
   const navigate = useNavigate();
 
   const {
