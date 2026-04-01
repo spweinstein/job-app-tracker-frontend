@@ -15,6 +15,8 @@ import {
 import { FormRow } from "../shared/forms";
 import { BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
+import { resumeCreateSchema } from "../../schemas/resumes.js";
+import { flattenZodErrors } from "../../schemas/common.js";
 
 const EMPTY_EXPERIENCE = {
   company: "",
@@ -48,13 +50,19 @@ const EMPTY_CERTIFICATION = {
 const EMPTY_SKILL = { skill: "" };
 
 const loadCompanies = async (q) => {
-  const res = await getCompanies({ q, limit: 20, sort: "name", sortDir: "asc" });
+  const res = await getCompanies({
+    q,
+    limit: 20,
+    sort: "name",
+    sortDir: "asc",
+  });
   return res.data.map((c) => ({ label: c.name, value: c._id }));
 };
 
 const ResumeForm = () => {
   const { setHeader = () => {} } = useOutletContext() ?? {};
-  const {errors, addError, clearErrors} = useErrors();
+  const { errors, addError, clearErrors } = useErrors();
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [searchParams] = useSearchParams();
   const parentId = searchParams.get("parentId");
@@ -76,7 +84,7 @@ const ResumeForm = () => {
       title: parentId ? "New Version" : "New Resume",
       actions: <BackButton onClick={() => navigate(-1)} />,
     });
-  }, [parentId]);
+  }, [parentId, setHeader, navigate]);
 
   useEffect(() => {
     if (!parentId) return;
@@ -88,30 +96,34 @@ const ResumeForm = () => {
           link: res.link ?? "",
           summary: res.summary ?? "",
           notes: res.notes ?? "",
-          experience: res.experience?.map((exp) => ({
-            ...exp,
-            company: exp.company?._id ?? exp.company ?? "",
-            startDate: exp.startDate ? exp.startDate.split("T")[0] : "",
-            endDate: exp.endDate ? exp.endDate.split("T")[0] : "",
-            description: exp.description ?? "",
-          })) ?? [],
-          education: res.education?.map((edu) => ({
-            ...edu,
-            year: edu.year ?? "",
-          })) ?? [],
-          projects: res.projects?.map((proj) => ({
-            ...proj,
-            company: proj.company?._id ?? proj.company ?? "",
-            year: proj.year ?? "",
-            link: proj.link ?? "",
-            description: proj.description ?? "",
-          })) ?? [],
-          certifications: res.certifications?.map((cert) => ({
-            ...cert,
-            company: cert.company?._id ?? cert.company ?? "",
-            year: cert.year ?? "",
-            description: cert.description ?? "",
-          })) ?? [],
+          experience:
+            res.experience?.map((exp) => ({
+              ...exp,
+              company: exp.company?._id ?? exp.company ?? "",
+              startDate: exp.startDate ? exp.startDate.split("T")[0] : "",
+              endDate: exp.endDate ? exp.endDate.split("T")[0] : "",
+              description: exp.description ?? "",
+            })) ?? [],
+          education:
+            res.education?.map((edu) => ({
+              ...edu,
+              year: edu.year ?? "",
+            })) ?? [],
+          projects:
+            res.projects?.map((proj) => ({
+              ...proj,
+              company: proj.company?._id ?? proj.company ?? "",
+              year: proj.year ?? "",
+              link: proj.link ?? "",
+              description: proj.description ?? "",
+            })) ?? [],
+          certifications:
+            res.certifications?.map((cert) => ({
+              ...cert,
+              company: cert.company?._id ?? cert.company ?? "",
+              year: cert.year ?? "",
+              description: cert.description ?? "",
+            })) ?? [],
           skills: res.skills?.map((s) => ({ skill: s })) ?? [],
         });
       } catch (e) {
@@ -119,7 +131,7 @@ const ResumeForm = () => {
       }
     };
     fetchParent();
-  }, [parentId]);
+  }, [parentId, addError, clearErrors, setFormData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -128,16 +140,22 @@ const ResumeForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    clearErrors();
+    setFieldErrors({});
+    const parsed = resumeCreateSchema.safeParse(formData);
+    if (!parsed.success) {
+      setFieldErrors(flattenZodErrors(parsed.error));
+      return;
+    }
     setSubmitting(true);
     try {
       await createResume({
-        ...formData,
-        skills: formData.skills.map((s) => s.skill).filter(Boolean),
-        ...(parentId && { parent: parentId }),
+        ...parsed.data,
+        ...(parentId ? { parent: parentId } : {}),
       });
       navigate("/resumes");
-    } catch (e) {
-      addError(e.message);
+    } catch (err) {
+      addError(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -152,10 +170,16 @@ const ResumeForm = () => {
             value={formData.name}
             onChange={handleChange}
             required
+            error={fieldErrors.name}
           />
         </FormField>
         <FormField label="Link">
-          <TextInput name="link" value={formData.link} onChange={handleChange} />
+          <TextInput
+            name="link"
+            value={formData.link}
+            onChange={handleChange}
+            error={fieldErrors.link}
+          />
         </FormField>
       </FormRow>
       <FormField label="Summary">
@@ -163,6 +187,7 @@ const ResumeForm = () => {
           name="summary"
           value={formData.summary}
           onChange={handleChange}
+          error={fieldErrors.summary}
         />
       </FormField>
       <FormField label="Notes">
@@ -170,6 +195,7 @@ const ResumeForm = () => {
           name="notes"
           value={formData.notes}
           onChange={handleChange}
+          error={fieldErrors.notes}
         />
       </FormField>
 
@@ -189,6 +215,7 @@ const ResumeForm = () => {
                 onChange={(e) => onChange(index, e)}
                 loadOptions={loadCompanies}
                 required
+                error={fieldErrors[`experience.${index}.company`]}
               />
             </FormField>
             <FormField label="Title">
@@ -197,6 +224,7 @@ const ResumeForm = () => {
                 value={item.title}
                 onChange={(e) => onChange(index, e)}
                 required
+                error={fieldErrors[`experience.${index}.title`]}
               />
             </FormField>
             <FormField label="Start Date">
@@ -205,6 +233,7 @@ const ResumeForm = () => {
                 value={item.startDate}
                 onChange={(e) => onChange(index, e)}
                 required
+                error={fieldErrors[`experience.${index}.startDate`]}
               />
             </FormField>
             <FormField label="End Date">
@@ -212,6 +241,7 @@ const ResumeForm = () => {
                 name="endDate"
                 value={item.endDate}
                 onChange={(e) => onChange(index, e)}
+                error={fieldErrors[`experience.${index}.endDate`]}
               />
             </FormField>
             <FormField label="Description">
@@ -219,6 +249,7 @@ const ResumeForm = () => {
                 name="description"
                 value={item.description}
                 onChange={(e) => onChange(index, e)}
+                error={fieldErrors[`experience.${index}.description`]}
               />
             </FormField>
           </>
@@ -240,6 +271,7 @@ const ResumeForm = () => {
                 value={item.degree}
                 onChange={(e) => onChange(index, e)}
                 required
+                error={fieldErrors[`education.${index}.degree`]}
               />
             </FormField>
             <FormField label="School">
@@ -248,6 +280,7 @@ const ResumeForm = () => {
                 value={item.school}
                 onChange={(e) => onChange(index, e)}
                 required
+                error={fieldErrors[`education.${index}.school`]}
               />
             </FormField>
             <FormField label="Year">
@@ -255,6 +288,7 @@ const ResumeForm = () => {
                 name="year"
                 value={item.year}
                 onChange={(e) => onChange(index, e)}
+                error={fieldErrors[`education.${index}.year`]}
               />
             </FormField>
           </>
@@ -276,6 +310,7 @@ const ResumeForm = () => {
                 value={item.title}
                 onChange={(e) => onChange(index, e)}
                 required
+                error={fieldErrors[`projects.${index}.title`]}
               />
             </FormField>
             <FormField label="Company">
@@ -285,6 +320,7 @@ const ResumeForm = () => {
                 onChange={(e) => onChange(index, e)}
                 loadOptions={loadCompanies}
                 required
+                error={fieldErrors[`projects.${index}.company`]}
               />
             </FormField>
             <FormField label="Year">
@@ -292,6 +328,7 @@ const ResumeForm = () => {
                 name="year"
                 value={item.year}
                 onChange={(e) => onChange(index, e)}
+                error={fieldErrors[`projects.${index}.year`]}
               />
             </FormField>
             <FormField label="Link">
@@ -299,6 +336,7 @@ const ResumeForm = () => {
                 name="link"
                 value={item.link}
                 onChange={(e) => onChange(index, e)}
+                error={fieldErrors[`projects.${index}.link`]}
               />
             </FormField>
             <FormField label="Description">
@@ -306,6 +344,7 @@ const ResumeForm = () => {
                 name="description"
                 value={item.description}
                 onChange={(e) => onChange(index, e)}
+                error={fieldErrors[`projects.${index}.description`]}
               />
             </FormField>
           </>
@@ -326,6 +365,7 @@ const ResumeForm = () => {
                 name="title"
                 value={item.title}
                 onChange={(e) => onChange(index, e)}
+                error={fieldErrors[`certifications.${index}.title`]}
               />
             </FormField>
             <FormField label="Company">
@@ -335,6 +375,7 @@ const ResumeForm = () => {
                 onChange={(e) => onChange(index, e)}
                 loadOptions={loadCompanies}
                 required
+                error={fieldErrors[`certifications.${index}.company`]}
               />
             </FormField>
             <FormField label="Year">
@@ -342,6 +383,7 @@ const ResumeForm = () => {
                 name="year"
                 value={item.year}
                 onChange={(e) => onChange(index, e)}
+                error={fieldErrors[`certifications.${index}.year`]}
               />
             </FormField>
             <FormField label="Description">
@@ -349,6 +391,7 @@ const ResumeForm = () => {
                 name="description"
                 value={item.description}
                 onChange={(e) => onChange(index, e)}
+                error={fieldErrors[`certifications.${index}.description`]}
               />
             </FormField>
           </>
@@ -359,15 +402,14 @@ const ResumeForm = () => {
         label="Skills"
         items={formData.skills}
         emptyItem={EMPTY_SKILL}
-        onItemsChange={(skills) =>
-          setFormData((prev) => ({ ...prev, skills }))
-        }
+        onItemsChange={(skills) => setFormData((prev) => ({ ...prev, skills }))}
         renderItem={(item, index, onChange) => (
           <FormField label="Skill">
             <TextInput
               name="skill"
               value={item.skill}
               onChange={(e) => onChange(index, e)}
+              error={fieldErrors[`skills.${index}.skill`]}
             />
           </FormField>
         )}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Outlet } from "react-router";
 import { PageContainer } from "../shared/layout/index.js";
 
@@ -7,11 +7,14 @@ const CoverLetterPage = () => {
   const [actions, setActions] = useState(null);
   const [errors, setErrors] = useState([]);
 
-  const setHeader = ({ title, actions = null, errors = [] }) => {
-    setTitle(title);
-    setActions(actions);
-    setErrors(errors);
-  };
+  const setHeader = useCallback(
+    ({ title, actions = null, errors = [] }) => {
+      setTitle(title);
+      setActions(actions);
+      setErrors(errors);
+    },
+    [setTitle, setActions, setErrors],
+  );
 
   return (
     <PageContainer title={title} actions={actions} errors={errors}>

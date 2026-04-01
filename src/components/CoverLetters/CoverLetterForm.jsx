@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import { createCoverLetter, getCoverLetter } from "../../services/coverLetterService.js";
+import {
+  createCoverLetter,
+  getCoverLetter,
+} from "../../services/coverLetterService.js";
 import { useNavigate, useSearchParams, useOutletContext } from "react-router";
 import {
   TextInput,
@@ -7,12 +10,15 @@ import {
   FormContainer,
   FormField,
 } from "../shared/forms/index.js";
-import { BackButton, SubmitButton, CancelButton} from "../shared/ui/index.js";
+import { BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
+import { coverLetterCreateSchema } from "../../schemas/coverLetters.js";
+import { flattenZodErrors } from "../../schemas/common.js";
 
 const CoverLetterForm = () => {
   const { setHeader = () => {} } = useOutletContext() ?? {};
-  const {errors, addError, clearErrors} = useErrors();
+  const { errors, addError, clearErrors } = useErrors();
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -28,7 +34,7 @@ const CoverLetterForm = () => {
       title: parentId ? "New Version" : "New Cover Letter",
       actions: <BackButton onClick={() => navigate(-1)} />,
     });
-  }, [parentId]);
+  }, [parentId, setHeader, navigate]);
 
   useEffect(() => {
     if (!parentId) return;
@@ -45,7 +51,7 @@ const CoverLetterForm = () => {
       }
     };
     fetchParent();
-  }, [parentId]);
+  }, [parentId, addError, setFormData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,30 +60,41 @@ const CoverLetterForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    clearErrors();
+    setFieldErrors({});
+    const payload = {
+      ...formData,
+      ...(parentId ? { parent: parentId } : {}),
+    };
+    const parsed = coverLetterCreateSchema.safeParse(payload);
+    if (!parsed.success) {
+      setFieldErrors(flattenZodErrors(parsed.error));
+      return;
+    }
+    const { parent, ...body } = parsed.data;
     setSubmitting(true);
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/ebbbd420-2498-4129-a13e-5fc82c7a528f',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'CoverLetterForm.jsx:handleSubmit',message:'submitting new cover letter',hypothesisId:'D',data:{parentId,parentIncluded:!!parentId},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     try {
-      await createCoverLetter({
-        ...formData,
-        ...(parentId && { parent: parentId }),
-      });
+      await createCoverLetter(parent ? { ...body, parent } : body);
       navigate("/cover-letters");
-    } catch (e) {
-      addError(e.message);
+    } catch (err) {
+      addError(err.message);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <FormContainer className="crud-form" onSubmit={handleSubmit} errors={errors}>
+    <FormContainer
+      className="crud-form"
+      onSubmit={handleSubmit}
+      errors={errors}
+    >
       <FormField label="Name">
         <TextInput
           name="name"
           value={formData.name}
           onChange={handleChange}
+          error={fieldErrors.name}
         />
       </FormField>
 
@@ -86,6 +103,7 @@ const CoverLetterForm = () => {
           name="body"
           value={formData.body}
           onChange={handleChange}
+          error={fieldErrors.body}
         />
       </FormField>
       <FormField label="Notes">
@@ -93,6 +111,7 @@ const CoverLetterForm = () => {
           name="notes"
           value={formData.notes}
           onChange={handleChange}
+          error={fieldErrors.notes}
         />
       </FormField>
       <div className="actions">

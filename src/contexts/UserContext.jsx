@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
 
 const UserContext = createContext();
 
@@ -22,8 +22,25 @@ const getUserFromToken = () => {
 
 const UserProvider = ({ children }) => {
   const [user, setUser] = useState(getUserFromToken());
+
+  // Memoize signOut to prevent unnecessary re-renders
+  const signOut = useCallback(() => {
+    localStorage.removeItem("token");
+    setUser(null);
+  }, [setUser]);
+
+  useEffect(() => {
+    // add session expired listener
+    // if the token is expired, sign out
+    // clear event listener on unmount
+    window.addEventListener("app:session-expired", signOut);
+    return () => {
+      window.removeEventListener("app:session-expired", signOut);
+    };
+  }, [signOut]);
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, signOut }}>
       {children}
     </UserContext.Provider>
   );

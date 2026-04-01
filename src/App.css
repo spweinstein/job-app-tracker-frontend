@@ -23,5 +23,13 @@ h2 {
   font-size: 1rem;
 }
 
+/* Link */
 
+a {
+  color: var(--text-primary);
+  text-decoration: none;
+}
 
+a:hover {
+  color: var(--text-secondary);
+}

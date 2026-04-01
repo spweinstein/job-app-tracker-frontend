@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getCompany, deleteCompany } from "../../services/companyService.js";
-import { deleteApplication } from "../../services/applicationService.js";
 import { useParams, useNavigate, Link } from "react-router";
-import { DataTable } from "../shared/views/index.js";
 import { DeleteButton, EditButton, BackButton } from "../shared/ui/index.js";
 import DetailsCard from "../shared/views/DetailsCard/DetailsCard.jsx";
 import useErrors from "../../hooks/useErrors.js";
@@ -15,15 +13,16 @@ const CompanyDetails = () => {
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const { errors, addError, clearErrors } = useErrors();
-  const [relatedApplications, setRelatedApplications] = useState([]);
   const { companyId } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCompany = async () => {
       try {
+        setLoading(true);
         const res = await getCompany(companyId);
         setCompany(res);
+        clearErrors();
       } catch (e) {
         addError(e.message);
       } finally {
@@ -31,24 +30,17 @@ const CompanyDetails = () => {
       }
     };
     fetchCompany();
-  }, [companyId]);
+  }, [companyId, addError, clearErrors, setLoading]);
 
-  const handleDeleteCompany = async () => {
+  const handleDeleteCompany = useCallback(async () => {
     try {
+      clearErrors();
       await deleteCompany(companyId);
       navigate("/companies");
     } catch (e) {
       addError(e.message);
     }
-  };
-
-  const handleDeleteApplication = async (applicationId) => {
-    try {
-      await deleteApplication(applicationId);
-    } catch (e) {
-      addError(e.message);
-    }
-  };
+  }, [companyId, navigate, addError, clearErrors]);
 
   useEffect(() => {
     setHeader({
@@ -63,7 +55,7 @@ const CompanyDetails = () => {
         </>
       ),
     });
-  }, [companyId]);
+  }, [companyId, handleDeleteCompany, setHeader, navigate]);
 
   if (loading) return <LoadingSpinner />;
   if (!company?._id) return <h3>Company Not Found</h3>;
@@ -93,7 +85,10 @@ const CompanyDetails = () => {
         ]}
       />
       <h2>Job Applications</h2>
-      <ApplicationList filterColumn="company" filterId={companyId} />
+      <ApplicationList
+        initialParams={{ company: companyId }}
+        isEmbedded={true}
+      />
     </>
   );
 };

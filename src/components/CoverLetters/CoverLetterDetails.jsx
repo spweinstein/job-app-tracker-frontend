@@ -26,6 +26,8 @@ const CoverLetterDetails = ({ isAiAssistantEnabled }) => {
   useEffect(() => {
     const fetchCoverLetter = async () => {
       try {
+        setLoading(true);
+        clearErrors();
         const res = await getCoverLetter(coverLetterId);
         setCoverLetter(res);
       } catch (e) {
@@ -35,18 +37,19 @@ const CoverLetterDetails = ({ isAiAssistantEnabled }) => {
       }
     };
     fetchCoverLetter();
-  }, [coverLetterId]);
-
-  const handleDeleteClick = async () => {
-    try {
-      await deleteCoverLetter(coverLetterId);
-      navigate("/cover-letters");
-    } catch (e) {
-      addError(e.message);
-    }
-  };
+  }, [coverLetterId, addError, clearErrors, setLoading]);
 
   useEffect(() => {
+    const handleDeleteClick = async () => {
+      try {
+        clearErrors();
+        await deleteCoverLetter(coverLetterId);
+        navigate("/cover-letters");
+      } catch (e) {
+        addError(e.message);
+      }
+    };
+
     setHeader({
       title: "Cover Letter Details",
       actions: (
@@ -59,7 +62,7 @@ const CoverLetterDetails = ({ isAiAssistantEnabled }) => {
         </>
       ),
     });
-  }, [coverLetterId]);
+  }, [coverLetterId, setHeader, navigate, addError, clearErrors]);
 
   if (loading) return <LoadingSpinner />;
   if (!coverLetter?._id) return <h3>Cover Letter Not Found</h3>;

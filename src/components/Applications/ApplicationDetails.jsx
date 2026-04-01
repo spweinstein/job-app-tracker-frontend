@@ -13,37 +13,41 @@ const ApplicationDetails = () => {
   const { setHeader = () => {} } = useOutletContext() ?? {};
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
-  const {errors, addError, clearErrors} = useErrors();
+  const { errors, addError, clearErrors } = useErrors();
   const { applicationId } = useParams();
   const navigate = useNavigate();
 
-  const handleDeleteClick = async () => {
-    try {
-      await deleteApplication(applicationId);
-      navigate("/applications");
-    } catch (e) {
-      addError(e.message);
-    }
-  };
 
   useEffect(() => {
+    const handleDeleteClick = async () => {
+      try {
+        await deleteApplication(applicationId);
+        navigate("/applications");
+      } catch (e) {
+        addError(e.message);
+      }
+    };
     setHeader({
       title: "Application Details",
       // Back, Edit, and Delete buttons
-      actions: 
-      <>
-        <BackButton onClick={() => navigate(-1)} />
-        <EditButton onClick={() => navigate(`/applications/${applicationId}/edit`)} />
-        <DeleteButton onClick={handleDeleteClick} />
-      </>
+      actions: (
+        <>
+          <BackButton onClick={() => navigate(-1)} />
+          <EditButton
+            onClick={() => navigate(`/applications/${applicationId}/edit`)}
+          />
+          <DeleteButton onClick={handleDeleteClick} />
+        </>
+      ),
     });
-  }, []);
+  }, [applicationId, navigate, addError, clearErrors, setHeader]);
 
   useEffect(() => {
     const fetchApplication = async () => {
       try {
         const res = await getApplication(applicationId);
         setApplication(res);
+        clearErrors();
       } catch (e) {
         addError(e.message);
       } finally {
@@ -51,72 +55,79 @@ const ApplicationDetails = () => {
       }
     };
     fetchApplication();
-  }, [applicationId]);
+  }, [applicationId, addError, clearErrors, setLoading]);
 
   if (loading) return <LoadingSpinner />;
   if (!application?._id) return <h3>Application Not Found</h3>;
 
   return (
-      <DetailsCard
-        title={{
-          label: "Company",
-          value: application.company?._id ? (
-            <Link to={`/companies/${application.company._id}`}>
-              {application.company.name}
+    <DetailsCard
+      errors={errors}
+      title={{
+        label: "Company",
+        value: application.company?._id ? (
+          <Link to={`/companies/${application.company._id}`}>
+            {application.company.name}
+          </Link>
+        ) : (
+          application.company?.name || "Unknown"
+        ),
+      }}
+      subtitle={{ label: "Job Title", value: application.title || "Untitled" }}
+      fields={[
+        {
+          label: "Status",
+          value: (
+            <span
+              className={`status status-${application.status?.toLowerCase()}`}
+            >
+              {application.status}
+            </span>
+          ),
+        },
+        {
+          label: "Priority",
+          value: (
+            <span
+              className={`priority priority-${application.priority?.toLowerCase()}`}
+            >
+              {application.priority}
+            </span>
+          ),
+        },
+        { label: "Source", value: application.source || null },
+        {
+          label: "Applied",
+          value: application.appliedAt
+            ? new Date(application.appliedAt).toLocaleDateString()
+            : null,
+        },
+        {
+          label: "Resume",
+          value: application.resume?._id ? (
+            <Link to={`/resumes/${application.resume._id}`}>
+              {application.resume.name || "Resume"}
             </Link>
-          ) : (application.company?.name || "Unknown"),
-        }}
-        subtitle={{ label: "Job Title", value: application.title || "Untitled" }}
-        fields={[
-          {
-            label: "Status",
-            value: (
-              <span className={`status status-${application.status?.toLowerCase()}`}>
-                {application.status}
-              </span>
-            ),
-          },
-          {
-            label: "Priority",
-            value: (
-              <span className={`priority priority-${application.priority?.toLowerCase()}`}>
-                {application.priority}
-              </span>
-            ),
-          },
-          { label: "Source", value: application.source || null },
-          {
-            label: "Applied",
-            value: application.appliedAt
-              ? new Date(application.appliedAt).toLocaleDateString()
-              : null,
-          },
-          {
-            label: "Resume",
-            value: application.resume?._id ? (
-              <Link to={`/resumes/${application.resume._id}`}>
-                {application.resume.name || "Resume"}
-              </Link>
-            ) : null,
-          },
-          {
-            label: "Cover Letter",
-            value: application.coverLetter?._id ? (
-              <Link to={`/cover-letters/${application.coverLetter._id}`}>
-                {application.coverLetter.name || "Cover Letter"}
-              </Link>
-            ) : null
-          },
-          {
-            label: "Link",
-            value: application.url ? (
-              <a href={application.url} target="_blank" rel="noopener noreferrer">
-                View Posting ↗
-              </a>
-            ) : null,
-          },
-        ]}
-      />
+          ) : null,
+        },
+        {
+          label: "Cover Letter",
+          value: application.coverLetter?._id ? (
+            <Link to={`/cover-letters/${application.coverLetter._id}`}>
+              {application.coverLetter.name || "Cover Letter"}
+            </Link>
+          ) : null,
+        },
+        {
+          label: "Link",
+          value: application.url ? (
+            <a href={application.url} target="_blank" rel="noopener noreferrer">
+              View Posting ↗
+            </a>
+          ) : null,
+        },
+      ]}
+    />
   );
 };
 

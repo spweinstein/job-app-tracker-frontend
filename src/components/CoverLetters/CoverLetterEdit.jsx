@@ -11,24 +11,35 @@ import {
   FormContainer,
   FormField,
 } from "../shared/forms/index.js";
-import { BackButton, DeleteButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
+import {
+  BackButton,
+  DeleteButton,
+  SubmitButton,
+  CancelButton,
+} from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
+import { coverLetterUpdateSchema } from "../../schemas/coverLetters.js";
+import { flattenZodErrors } from "../../schemas/common.js";
 
 const CoverLetterEdit = () => {
   const { setHeader = () => {} } = useOutletContext() ?? {};
-  const {errors, addError, clearErrors} = useErrors();
+  const { errors, addError, clearErrors } = useErrors();
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     body: "",
     notes: "",
   });
+  const [loading, setLoading] = useState(true);
   const { coverLetterId } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCoverLetter = async () => {
       try {
+        setLoading(true);
+        clearErrors();
         const res = await getCoverLetter(coverLetterId);
         const { name, body, notes } = res;
         setFormData({
@@ -41,7 +52,7 @@ const CoverLetterEdit = () => {
       }
     };
     fetchCoverLetter();
-  }, [coverLetterId]);
+  }, [coverLetterId, addError, clearErrors, setLoading]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,27 +61,33 @@ const CoverLetterEdit = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    clearErrors();
+    setFieldErrors({});
+    const parsed = coverLetterUpdateSchema.safeParse(formData);
+    if (!parsed.success) {
+      setFieldErrors(flattenZodErrors(parsed.error));
+      return;
+    }
     setSubmitting(true);
     try {
-      await updateCoverLetter(coverLetterId, formData);
+      await updateCoverLetter(coverLetterId, parsed.data);
       navigate(`/cover-letters/${coverLetterId}`);
-    } catch (e) {
-      addError(e.message);
+    } catch (err) {
+      addError(err.message);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDeleteClick = async () => {
-    try {
-      await deleteCoverLetter(coverLetterId);
-      navigate("/cover-letters");
-    } catch (e) {
-      addError(e.message);
-    }
-  };
-
   useEffect(() => {
+    const handleDeleteClick = async () => {
+      try {
+        await deleteCoverLetter(coverLetterId);
+        navigate("/cover-letters");
+      } catch (e) {
+        addError(e.message);
+      }
+    };
     setHeader({
       title: "Edit Cover Letter",
       actions: (
@@ -80,15 +97,23 @@ const CoverLetterEdit = () => {
         </>
       ),
     });
-  }, [coverLetterId]);
+  }, [coverLetterId, setHeader, navigate, addError]);
+
+  if (loading) return <LoadingSpinner />;
+  if (!formData?._id) return <h3>Cover Letter Not Found</h3>;
 
   return (
-    <FormContainer className="crud-form" onSubmit={handleSubmit} errors={errors}>
+    <FormContainer
+      className="crud-form"
+      onSubmit={handleSubmit}
+      errors={errors}
+    >
       <FormField label="Name">
         <TextInput
           name="name"
           value={formData.name}
           onChange={handleChange}
+          error={fieldErrors.name}
         />
       </FormField>
 
@@ -97,6 +122,7 @@ const CoverLetterEdit = () => {
           name="body"
           value={formData.body}
           onChange={handleChange}
+          error={fieldErrors.body}
         />
       </FormField>
       <FormField label="Notes">
@@ -104,6 +130,7 @@ const CoverLetterEdit = () => {
           name="notes"
           value={formData.notes}
           onChange={handleChange}
+          error={fieldErrors.notes}
         />
       </FormField>
       <div className="actions">

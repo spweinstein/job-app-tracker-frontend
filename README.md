@@ -1,64 +1,94 @@
-# Job App Tracker (Frontend)
+# Job Application Tracker — Frontend
 
-```
-App
-├── NavBar
-└── Routes
-    └── PageContainer
-        ├── PageHeader
-        │   └── [actions slot]
-        │       ├── ListActions
-        │       ├── DetailActions
-        │       │   └── ConfirmDeleteButton
-        │       └── (none)
-        └── PageContent
-            ├── FormContainer
-            │   ├── FormField
-            │   │   └── TextInput | TextAreaInput | SelectInput | TagInput
-            │   ├── RepeatableFieldGroup
-            │   │   └── FormField (no label, placeholder only)
-            │   └── FormActions
-            ├── DetailContainer
-            │   └── SectionCard
-            │       └── DetailField
-            └── ListContainer
+React SPA for tracking companies, job applications, resumes, and cover letters. It talks to the companion backend over HTTP with JWT auth stored in `localStorage`.
+
+## Stack
+
+- **React 19** + **Vite 7**
+- **React Router 7** (`BrowserRouter`, nested routes)
+- **Axios** (shared instance in `src/services/api.js` with auth header + 401 handling)
+
+## Prerequisites
+
+- Node.js (LTS recommended)
+- Backend running and reachable at the URL you set in `.env` (see below)
+
+## Setup
+
+```bash
+npm install
+cp .env.example .env
+# Edit .env: set VITE_BACK_END_SERVER_URL to your API origin (no trailing path segments required).
+npm run dev
 ```
 
-## AI Ask-Only Chat Panel
+The dev server prints a local URL (typically `http://localhost:5173`).
 
-- **Where it lives**
-  - **Resumes**: On the Resume Details view (`/resumes/:resumeId`), the right-hand sidebar shows an **Assistant** chat panel alongside the Versions (`DocumentLineagePanel`). The panel is mounted via `AIChatPanel` inside `ResumeDetails`.
-  - **Cover Letters**: On the Cover Letter Details view (`/cover-letters/:coverLetterId`), the same **Assistant** chat panel appears in the right-hand sidebar next to the Versions panel, mounted from `CoverLetterDetails`.
-  - Layout for these views uses a simple two-column flex wrapper defined in `DocumentPageLayout.css` (`.document-page-layout`, `.document-main`, `.document-sidebar`), stacking vertically on smaller screens.
+## Environment variables
 
-- **Frontend wiring**
-  - `src/api/ai.js`
-    - **createDocumentThread({ docType, documentId })**: `POST /api/ai/threads` → returns `{ threadId, thread }`. `docType` is `"resume"` or `"cover_letter"`, and `documentId` is the resume/cover letter `_id`.
-    - **getThreadMessages(threadId, { cursor, limit })**: `GET /api/ai/threads/:threadId/messages` → returns `{ messages, nextCursor }` (the component currently just loads the first page).
-    - **postThreadMessage(threadId, text)**: `POST /api/ai/threads/:threadId/messages` → returns `{ userMessage, assistantMessage }`.
-  - `src/components/AIChatPanel.jsx`
-    - Props: **docType**, **documentId**.
-    - On mount:
-      - Calls `createDocumentThread({ docType, documentId })` and stores `threadId`.
-      - Loads existing history via `getThreadMessages(threadId)` and renders messages in a scrollable list.
-    - Sending:
-      - Textarea + **Send** button (Ask-only chat).
-      - Calls `postThreadMessage(threadId, text)` and appends the returned `userMessage` and `assistantMessage`.
-      - Shows a small loading state ("Assistant is thinking…") while the assistant response is pending.
-    - Error handling:
-      - Renders an inline error bar when thread/message calls fail.
-      - Exposes a **Retry** button that resends the last user message.
-    - UX:
-      - Auto-scrolls to the bottom whenever new messages arrive.
-      - Uses lightweight styles in `AIChatPanel.css` to match existing card/panel visuals.
+| Variable | Purpose |
+|----------|---------|
+| `VITE_BACK_END_SERVER_URL` | **Required.** API base URL (e.g. `http://localhost:3000`). All service calls use paths like `/companies`, `/auth/login`, `/ai/threads`. |
+| `VITE_AI_ASSISTANT_ENABLED` | Set to `true` to show AI assistant UI (navbar toggle, right-hand chat drawer, document chat on resume/cover-letter detail pages). Any other value leaves it off. |
 
-- **Backend endpoints used**
-  - **POST `/api/ai/threads`**
-    - Body: `{ docType, documentId }`
-    - Creates (or reuses) an AI thread scoped to a specific resume or cover letter document for the authenticated user.
-  - **GET `/api/ai/threads/:threadId/messages`**
-    - Query params: `cursor` (optional), `limit` (optional).
-    - Returns messages for that document-scoped thread in ascending `createdAt` order plus an optional `nextCursor`.
-  - **POST `/api/ai/threads/:threadId/messages`**
-    - Body: `{ text }` (server forces `mode: "ASK"`).
-    - Persists the user message, calls OpenAI Ask-mode under the hood, stores the assistant reply, and returns both messages.
+Copy from `.env.example` and adjust.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite dev server with HMR |
+| `npm run build` | Production build to `dist/` |
+| `npm run preview` | Serve the production build locally |
+| `npm run lint` | Run ESLint |
+
+## Routing and access
+
+- **`/home`** — Public landing page with links to register/login.
+- **`/login`**, **`/register`** — Auth forms; successful login stores a JWT and updates `UserContext`.
+- **`/`** (authenticated shell) — `AppLayout`: left navigation sidebar, main content (`<Outlet />`), and optional right **AI Assistant** drawer when the feature flag is on. Without a valid user, `/` redirects to `/home`; other protected paths redirect to `/login` (with `state.from` for return navigation).
+- **Nested app routes** (under `/`):
+  - `/` — Dashboard (stats and quick views)
+  - `/companies`, `/companies/new`, `/companies/:companyId`, `/companies/:companyId/edit`
+  - `/applications`, `/applications/new`, `/applications/:applicationId`, `/applications/:applicationId/edit`
+  - `/resumes`, …, `/resumes/:resumeId`, …
+  - `/cover-letters`, …, `/cover-letters/:coverLetterId`, …
+- **`/*`** — `NotFound` page.
+
+The top **NavBar** is always visible; hamburger opens the left sidebar when logged in.
+
+## Features (high level)
+
+- **Dashboard** — Aggregates application stats and highlights (e.g. interviewing).
+- **Companies** — CRUD-style list, detail, create, and edit.
+- **Applications** — Same pattern, linked to companies and statuses.
+- **Resumes & cover letters** — List, create, edit, detail; detail views can show **document lineage** (versions) via `DocumentLineagePanel`.
+- **AI assistant** (when `VITE_AI_ASSISTANT_ENABLED=true`):
+  - **Global** — `ChatPanel` in `AppLayout` wraps `AIChat` with no `docType` / `documentId` (general thread).
+  - **Per document** — On resume and cover letter detail pages, `AIChat` is imported as `AIChatPanel` and receives `docType` (`resume` | `cover_letter`) and the document id so the backend can scope the thread.
+
+## Auth and API client
+
+- **Token** — Stored as `localStorage.token`; `UserContext` decodes the JWT payload for the current user. Shaped `payload` in the body is supported.
+- **`src/services/api.js`** — Attaches `Authorization: Bearer <token>` when present; on `401` (except login/register), dispatches `app:session-expired` and `UserProvider` clears the session.
+- Domain calls live in `src/services/*Service.js` and `src/services/authService.js`; AI helpers are in `src/services/ai.js` (`createThread`, `getThreadMessages`, `postThreadMessage`, `getThreads`).
+
+## Source layout (where things live)
+
+- `src/main.jsx` — `BrowserRouter`, `UserProvider`, root render.
+- `src/App.jsx` — Routes, feature flag for AI, NavBar state (sidebar + chat drawer).
+- `src/contexts/` — `UserContext` (user + sign-out).
+- `src/components/` — Feature areas: `Dashboard`, `Companies`, `Applications`, `Resumes`, `CoverLetters`, `Landing`, auth forms, `NotFound`.
+- `src/components/shared/` — Layout (`AppLayout`, `NavBar`, `AppSidebar`, `PageContainer`), lists/pagination/search, forms (`FormField`, inputs, `FormContainer`), tables (`DataTable`), document UI (`DocumentLineagePanel`), chat (`ChatPanel`, `AIChat.jsx`).
+- `src/hooks/` — `useForm`, `useErrors`, `usePaginatedQuery`, `useMediaQuery`, etc.
+
+## UI patterns
+
+Many list/detail/form screens use **PageContainer** (header + content): **ListContainer** / **ListActions**, **DetailContainer** / **DetailActions**, and **FormContainer** with **FormField** variants (text, textarea, select, tags, repeatable groups, etc.). Styling is mostly component-level CSS files.
+
+## AI integration (reference)
+
+- **Client** — `src/services/ai.js` calls (relative to `VITE_BACK_END_SERVER_URL`): `POST /ai/threads`, `GET /ai/threads/:threadId/messages`, `POST /ai/threads/:threadId/messages`, optionally `GET /ai/threads`.
+- **UI** — `src/components/shared/layout/ChatPanel/AIChat.jsx`: creates or resumes a thread, loads message history, send/retry, loading and error states. Styles: `AIChat.css`, `ChatPanel.css`. Document pages use the same component with `docType` and `documentId` for a scoped thread.
+
+The backend must implement these routes and enforce auth; OpenAI (or similar) is configured on the server, not in this repo.

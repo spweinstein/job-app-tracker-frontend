@@ -8,20 +8,12 @@ import {
   FormField,
   TextInput,
   PasswordInput,
-  FormRow,
 } from "./shared/forms/index.js";
 import { SubmitButton, CancelButton } from "./shared/ui/index.js";
 import useErrors from "../hooks/useErrors.js";
 import useForm from "../hooks/useForm.js";
+import { loginBodySchema } from "../schemas/auth.js";
 import "./shared/forms/AuthForm.css";
-
-const validate = (formData) => {
-  const errors = {};
-  if (!formData.username) {
-    errors.username = "Username is required";
-  }
-  return errors;
-};
 
 const initialState = {
   username: "",
@@ -29,7 +21,7 @@ const initialState = {
 };
 
 const LoginForm = () => {
-  const { errors, addError, clearErrors } = useErrors();
+  const { errors, addError } = useErrors();
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
@@ -50,15 +42,11 @@ const LoginForm = () => {
     }
   };
 
-  const {
-    register,
-    formData,
-    setFormData,
-    fieldErrors,
-    handleChange,
-    handleSubmit,
-    formErrors,
-  } = useForm(initialState, onSubmit);
+  const { register, fieldErrors, handleSubmit, formErrors } = useForm(
+    initialState,
+    onSubmit,
+    { schema: loginBodySchema },
+  );
 
   return (
     <PageContainer title="Sign In" errors={errors}>
@@ -68,17 +56,12 @@ const LoginForm = () => {
         errors={formErrors}
       >
         <FormField label="Username">
-          <TextInput
-            {...register("username", (value) =>
-              value.length > 0 ? undefined : "Username is required",
-            )}
-          />
+          <TextInput {...register("username")} error={fieldErrors.username} />
         </FormField>
         <FormField label="Password">
           <PasswordInput
-            {...register("password", (value) =>
-              value.length > 0 ? undefined : "Password is required",
-            )}
+            {...register("password")}
+            error={fieldErrors.password}
           />
         </FormField>
         <div className="form-actions">

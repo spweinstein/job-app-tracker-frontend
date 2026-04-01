@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import "./App.css";
 import Landing from "./components/Landing/Landing.jsx";
 import CompanyPage from "./components/Companies/CompanyPage.jsx";
@@ -28,8 +28,6 @@ import RegisterForm from "./components/RegisterForm.jsx";
 import AppLayout from "./components/shared/layout/AppLayout/AppLayout.jsx";
 import "./components/shared/list/ListControls.css";
 import Dashboard from "./components/Dashboard/Dashboard.jsx";
-import PrivateRoute from "./components/PrivateRoute/PrivateRoute.jsx";
-import { UserContext } from "./contexts/UserContext.jsx";
 import NotFound from "./components/NotFound/NotFound.jsx";
 
 function App() {
@@ -42,7 +40,6 @@ function App() {
 
   const toggleChat = () => setChatOpen((o) => !o);
   const closeChat = () => setChatOpen(false);
-  const { user } = useContext(UserContext);
 
   return (
     <>

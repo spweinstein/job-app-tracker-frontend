@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { getCompanies, deleteCompany } from "../../services/companyService.js";
 import { Link, useNavigate } from "react-router";
 import { DataTable } from "../shared/views/index.js";
@@ -18,20 +18,13 @@ const CompanyList = () => {
   const { setHeader } = useOutletContext();
 
   const { errors, addError, clearErrors } = useErrors();
-  const {
-    data,
-    total,
-    totalPages,
-    loading,
-    query,
-    setQuery,
-    sortField,
-    sortDir,
-    toggleSort,
-    page,
-    setPage,
-    refresh,
-  } = usePaginatedQuery(getCompanies);
+  const { q, params, setParams, response, setFilter, toggleSort, refresh } =
+    usePaginatedQuery(getCompanies, {
+      page: 1,
+      limit: 10,
+      sort: "updatedAt",
+      sortDir: "asc",
+    });
 
   useEffect(() => {
     setHeader({
@@ -42,20 +35,20 @@ const CompanyList = () => {
         </Link>
       ),
     });
-  }, []);
+  }, [setHeader]);
 
-  const handleEdit = (companyId) => {
-    navigate(`/companies/${companyId}/edit`);
-  };
-
-  const handleDelete = async (companyId) => {
-    try {
-      await deleteCompany(companyId);
-      refresh();
-    } catch (error) {
-      addError(error.message);
-    }
-  };
+  const handleDelete = useCallback(
+    async (companyId) => {
+      try {
+        await deleteCompany(companyId);
+        refresh();
+        clearErrors();
+      } catch (error) {
+        addError(error.message);
+      }
+    },
+    [refresh, addError, clearErrors],
+  );
 
   const columns = [
     {
@@ -102,24 +95,24 @@ const CompanyList = () => {
         </div>
       )}
       <ListSearch
-        value={query}
-        onChange={setQuery}
+        value={q}
+        onChange={setFilter}
         placeholder="Search companies…"
-        total={total}
+        total={response.total}
       />
       <ListPagination
-        page={page}
-        totalPages={totalPages}
-        onPageChange={setPage}
+        page={params.page}
+        totalPages={response.totalPages}
+        onPageChange={(page) => setParams({ ...params, page })}
       />
-      {loading ? (
+      {response.loading ? (
         <LoadingSpinner />
       ) : (
         <DataTable
           columns={columns}
-          data={data}
-          sortField={sortField}
-          sortDir={sortDir}
+          data={response.data}
+          sortField={params.sort}
+          sortDir={params.sortDir}
           onSort={toggleSort}
           emptyState={<p>No companies found.</p>}
         />

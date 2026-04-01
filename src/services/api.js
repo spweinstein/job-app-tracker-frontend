@@ -54,6 +54,24 @@ const createAPI = (baseURL) => {
     },
   );
 
+  // check for expired token and redirect to login
+  api.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      if (
+        error.response?.status === 401 &&
+        !error.config.url.includes("login") &&
+        !error.config.url.includes("register")
+      ) {
+        window.dispatchEvent(new Event("app:session-expired"));
+        // window.location.href = "/login";
+      }
+      return Promise.reject(error);
+    },
+  );
+
   return api;
 };
 

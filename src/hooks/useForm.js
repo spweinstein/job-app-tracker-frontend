@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import useErrors from "./useErrors.js";
+import { flattenZodErrors } from "../schemas/common.js";
 
-const useForm = (initialState, onSubmit) => {
+const useForm = (initialState, onSubmit, options = {}) => {
+  const { schema } = options;
   const [formData, setFormData] = useState(initialState);
   const [fieldErrors, setFieldErrors] = useState({});
   const {errors, addError, clearErrors} = useErrors();
@@ -16,14 +18,24 @@ const useForm = (initialState, onSubmit) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     clearErrors();
+    setFieldErrors({});
+    let payload = formData;
+    if (schema) {
+      const parsed = schema.safeParse(formData);
+      if (!parsed.success) {
+        setFieldErrors(flattenZodErrors(parsed.error));
+        return;
+      }
+      payload = parsed.data;
+    }
     try {
-        await onSubmit(formData);
+        await onSubmit(payload);
     } catch (err) {
         addError(err.message);
     }
   };
 
-  const register = (name, validate=()=>true) => {
+  const register = (name, validate = () => undefined) => {
     return {
       onChange: (e) => {
         const { name, value } = e.target;

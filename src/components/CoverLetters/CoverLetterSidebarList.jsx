@@ -4,15 +4,18 @@ import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
 
 const CoverLetterSidebarList = () => {
-  const { data, query, setQuery } = usePaginatedQuery(getCoverLetters, {
-    defaultLimit: 10,
+  const { q, response, setFilter } = usePaginatedQuery(getCoverLetters, {
+    page: 1,
+    limit: 10,
+    sort: "updatedAt",
+    sortDir: "asc",
   });
 
   return (
     <>
       <ListSearch
-        value={query}
-        onChange={setQuery}
+        value={q}
+        onChange={setFilter}
         placeholder="Search cover letters…"
       />
       <ul className="sidebar-list">
@@ -21,9 +24,11 @@ const CoverLetterSidebarList = () => {
             + New Cover Letter
           </NavLink>
         </li>
-        {data.map((cl) => (
+        {response.data.map((cl) => (
           <li key={cl._id}>
-            <NavLink to={`/cover-letters/${cl._id}`}>{cl.name || "Untitled"}</NavLink>
+            <NavLink to={`/cover-letters/${cl._id}`}>
+              {cl.name || "Untitled"}
+            </NavLink>
           </li>
         ))}
         <li>

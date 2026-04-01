@@ -14,7 +14,7 @@ export const register = async (formData) => {
     }
     throw new Error("Invalid response from server");
   } catch (e) {
-    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
+    throw e.response?.data?.error ? new Error(e.response.data.error) : e;
   }
 };
 

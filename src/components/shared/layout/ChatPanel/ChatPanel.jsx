@@ -8,7 +8,7 @@ const SECTIONS = [
   // { key: "history", label: "History" },
 ];
 
-const ChatPanel = ({ }) => {
+const ChatPanel = () => {
   const [activeSection, setActiveSection] = useState("assistant");
 
   const SECTION_CONTENT = {

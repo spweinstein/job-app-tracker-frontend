@@ -4,15 +4,18 @@ import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
 
 const ResumeSidebarList = () => {
-  const { data, query, setQuery } = usePaginatedQuery(getResumes, {
-    defaultLimit: 10,
+  const { q, response, setFilter } = usePaginatedQuery(getResumes, {
+    page: 1,
+    limit: 10,
+    sort: "updatedAt",
+    sortDir: "asc",
   });
 
   return (
     <>
       <ListSearch
-        value={query}
-        onChange={setQuery}
+        value={q}
+        onChange={setFilter}
         placeholder="Search resumes…"
       />
       <ul className="sidebar-list">
@@ -21,14 +24,15 @@ const ResumeSidebarList = () => {
             + New Resume
           </NavLink>
         </li>
-        {data.map((r) => (
+        {response.data.map((r) => (
           <li key={r._id}>
-            <NavLink to={`/resumes/${r._id}`}> 
-            {r?.name || "Untitled"}
-            <span 
-            className="sidebar-list__version"> (v{r.version || "0"})</span>
+            <NavLink to={`/resumes/${r._id}`}>
+              {r?.name || "Untitled"}
+              <span className="sidebar-list__version">
+                {" "}
+                (v{r.version || "0"})
+              </span>
             </NavLink>
-
           </li>
         ))}
         <li>

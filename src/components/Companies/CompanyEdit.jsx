@@ -18,12 +18,17 @@ import {
   SubmitButton,
   CancelButton,
 } from "../shared/ui/index.js";
+import { LoadingSpinner } from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import { useOutletContext } from "react-router";
+import { companySubmitSchema } from "../../schemas/companies.js";
+import { flattenZodErrors } from "../../schemas/common.js";
 
 const CompanyEdit = () => {
   const { setHeader } = useOutletContext();
   const { errors, addError, clearErrors } = useErrors();
+  const [loading, setLoading] = useState(true);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -38,14 +43,18 @@ const CompanyEdit = () => {
   useEffect(() => {
     const fetchCompany = async () => {
       try {
+        setLoading(true);
+        clearErrors();
         const res = await getCompany(companyId);
         setFormData(res);
       } catch (e) {
         addError(e.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchCompany();
-  }, [companyId]);
+  }, [companyId, addError, clearErrors, setLoading]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,30 +63,37 @@ const CompanyEdit = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    clearErrors();
+    setFieldErrors({});
+    const parsed = companySubmitSchema.safeParse(formData);
+    if (!parsed.success) {
+      setFieldErrors(flattenZodErrors(parsed.error));
+      return;
+    }
     setSubmitting(true);
     try {
-      const res = await updateCompany(companyId, formData);
+      const res = await updateCompany(companyId, parsed.data);
       if (res.error) {
         addError(res.error);
       }
       navigate(`/companies/${companyId}`);
-    } catch (e) {
-      addError(e.message);
+    } catch (err) {
+      addError(err.message);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDeleteClick = async () => {
-    try {
-      await deleteCompany(companyId);
-      navigate("/companies");
-    } catch (e) {
-      addError(e.message);
-    }
-  };
-
   useEffect(() => {
+    const handleDeleteClick = async () => {
+      try {
+        await deleteCompany(companyId);
+        navigate("/companies");
+      } catch (e) {
+        addError(e.message);
+      }
+    };
+
     setHeader({
       title: "Edit Company",
       actions: (
@@ -87,7 +103,10 @@ const CompanyEdit = () => {
         </>
       ),
     });
-  }, [companyId]);
+  }, [companyId, addError, setHeader, navigate]);
+
+  if (loading) return <LoadingSpinner />;
+  if (!formData?._id) return <h3>Company Not Found</h3>;
 
   return (
     <FormContainer
@@ -102,10 +121,16 @@ const CompanyEdit = () => {
             value={formData.name}
             onChange={handleChange}
             required
+            error={fieldErrors.name}
           />
         </FormField>
         <FormField label="Website">
-          <TextInput name="url" value={formData.url} onChange={handleChange} />
+          <TextInput
+            name="url"
+            value={formData.url}
+            onChange={handleChange}
+            error={fieldErrors.url}
+          />
         </FormField>
       </FormRow>
       <FormField label="Description">
@@ -113,6 +138,7 @@ const CompanyEdit = () => {
           name="description"
           value={formData.description}
           onChange={handleChange}
+          error={fieldErrors.description}
         />
       </FormField>
       <FormField label="Notes">
@@ -120,6 +146,7 @@ const CompanyEdit = () => {
           name="notes"
           value={formData.notes}
           onChange={handleChange}
+          error={fieldErrors.notes}
         />
       </FormField>
       <div className="actions">

@@ -1,35 +1,32 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import {
   getCoverLetters,
   deleteCoverLetter,
 } from "../../services/coverLetterService.js";
 import { Link, useNavigate, useOutletContext } from "react-router";
 import { DataTable } from "../shared/views/index.js";
-import { DeleteButton, EditButton, LoadingSpinner } from "../shared/ui/index.js";
+import {
+  DeleteButton,
+  EditButton,
+  LoadingSpinner,
+} from "../shared/ui/index.js";
 import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
 import { ListPagination } from "../shared/list/ListPagination.jsx";
-
+import useErrors from "../../hooks/useErrors.js";
 
 const CoverLetterList = () => {
   const { setHeader = () => {} } = useOutletContext() ?? {};
   const navigate = useNavigate();
 
-  const {
-    data,
-    total,
-    totalPages,
-    loading,
-    errors,
-    query,
-    setQuery,
-    sortField,
-    sortDir,
-    toggleSort,
-    page,
-    setPage,
-    refresh,
-  } = usePaginatedQuery(getCoverLetters);
+  const { q, params, setParams, response, setFilter, toggleSort, refresh } =
+    usePaginatedQuery(getCoverLetters, {
+      page: 1,
+      limit: 10,
+      sort: "updatedAt",
+      sortDir: "asc",
+    });
+  const { errors, addError, clearErrors } = useErrors();
 
   useEffect(() => {
     setHeader({
@@ -40,16 +37,21 @@ const CoverLetterList = () => {
         </Link>
       ),
     });
-  }, []);
+  }, [setHeader, navigate]);
 
-  const handleDelete = async (coverLetterId) => {
-    try {
-      await deleteCoverLetter(coverLetterId);
-      refresh();
-    } catch (error) {
-      // errors surfaced via hook
-    }
-  };
+  const handleDelete = useCallback(
+    async (coverLetterId) => {
+      try {
+        clearErrors();
+        await deleteCoverLetter(coverLetterId);
+        refresh();
+      } catch (error) {
+        // errors surfaced via hook
+        addError(error.message);
+      }
+    },
+    [refresh, addError, clearErrors],
+  );
 
   const columns = [
     {
@@ -90,10 +92,16 @@ const CoverLetterList = () => {
       key: "actions",
       label: "Actions",
       isActions: true,
-      render: (row, {tableWidth}) => (
+      render: (row, { tableWidth }) => (
         <div className="actions">
-          <EditButton onClick={() => navigate(`/cover-letters/${row._id}/edit`)} size={tableWidth < 500 ? "icon" : "xs"} />
-          <DeleteButton onClick={() => handleDelete(row._id)} size={tableWidth < 500 ? "icon" : "xs"} />
+          <EditButton
+            onClick={() => navigate(`/cover-letters/${row._id}/edit`)}
+            size={tableWidth < 500 ? "icon" : "xs"}
+          />
+          <DeleteButton
+            onClick={() => handleDelete(row._id)}
+            size={tableWidth < 500 ? "icon" : "xs"}
+          />
         </div>
       ),
     },
@@ -101,25 +109,36 @@ const CoverLetterList = () => {
 
   return (
     <>
+      {errors.length > 0 && (
+        <div className="error-message">
+          {errors.map((e) => (
+            <p key={e}>{e}</p>
+          ))}
+        </div>
+      )}
       <ListSearch
-        value={query}
-        onChange={setQuery}
+        value={q}
+        onChange={setFilter}
         placeholder="Search cover letters…"
-        total={total}
+        total={response.total}
       />
-      {loading ? (
+      {response.loading ? (
         <LoadingSpinner />
-        ) : (
+      ) : (
         <DataTable
           columns={columns}
-          data={data}
-          sortField={sortField}
-          sortDir={sortDir}
+          data={response.data}
+          sortField={params.sort}
+          sortDir={params.sortDir}
           onSort={toggleSort}
           emptyState={<p>No cover letters found.</p>}
         />
       )}
-      <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      <ListPagination
+        page={params.page}
+        totalPages={response.totalPages}
+        onPageChange={(page) => setParams({ ...params, page })}
+      />
     </>
   );
 };

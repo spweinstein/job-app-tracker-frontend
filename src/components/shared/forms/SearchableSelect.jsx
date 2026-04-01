@@ -11,15 +11,16 @@ const normalize = (value) => {
 
 const SearchableSelect = ({
   name,
-  value,           // string ID  OR  { _id, name } object — both accepted
+  value, // string ID  OR  { _id, name } object — both accepted
   loadOptions,
   onChange,
   required,
   placeholder = "Select…",
+  error,
 }) => {
-  const [open, setOpen]             = useState(false);
-  const [query, setQuery]           = useState("");
-  const [items, setItems]           = useState([]);
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [items, setItems] = useState([]);
   const [selectedLabel, setSelectedLabel] = useState("");
 
   const { id: resolvedId, label: objectLabel } = normalize(value);
@@ -32,7 +33,7 @@ const SearchableSelect = ({
     if (open) {
       loadOptions("").then(setItems);
     }
-  }, [open]);
+  }, [open, loadOptions]);
 
   const handleQueryChange = (e) => {
     const q = e.target.value;
@@ -69,6 +70,11 @@ const SearchableSelect = ({
         <span>{open ? "▲" : "▼"}</span>
       </div>
 
+      {error ? (
+        <span className="field-error" id={`${name}-error`} role="alert">
+          {error}
+        </span>
+      ) : null}
       {open && (
         <div className="searchable-select__dropdown">
           <input

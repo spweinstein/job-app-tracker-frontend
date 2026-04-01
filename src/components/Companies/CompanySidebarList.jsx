@@ -4,15 +4,18 @@ import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
 
 const CompanySidebarList = () => {
-  const { data, query, setQuery } = usePaginatedQuery(getCompanies, {
-    defaultLimit: 10,
+  const { q, response, setFilter } = usePaginatedQuery(getCompanies, {
+    page: 1,
+    limit: 10,
+    sort: "updatedAt",
+    sortDir: "asc",
   });
 
   return (
     <>
       <ListSearch
-        value={query}
-        onChange={setQuery}
+        value={q}
+        onChange={setFilter}
         placeholder="Search companies…"
       />
       <ul className="sidebar-list">
@@ -21,7 +24,7 @@ const CompanySidebarList = () => {
             + New Company
           </NavLink>
         </li>
-        {data.map((c) => (
+        {response.data.map((c) => (
           <li key={c._id}>
             <NavLink to={`/companies/${c._id}`}>{c.name}</NavLink>
           </li>

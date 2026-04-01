@@ -2,7 +2,12 @@ import { useState, useEffect } from "react";
 import { getResume, deleteResume } from "../../services/resumeService.js";
 import { useParams, useNavigate, useOutletContext } from "react-router";
 import "./Resume.css";
-import { BackButton, EditButton, DeleteButton, LoadingSpinner } from "../shared/ui/index.js";
+import {
+  BackButton,
+  EditButton,
+  DeleteButton,
+  LoadingSpinner,
+} from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
 import ApplicationList from "../Applications/ApplicationList.jsx";
@@ -17,7 +22,8 @@ const formatDate = (dateStr) => {
 
 const ResumeDetails = ({ isAiAssistantEnabled }) => {
   const { setHeader = () => {} } = useOutletContext() ?? {};
-  const {errors, addError, clearErrors} = useErrors();
+  const { errors, addError, clearErrors } = useErrors();
+  const [loading, setLoading] = useState(true);
   const [resume, setResume] = useState({ _id: null });
   const { resumeId } = useParams();
   const navigate = useNavigate();
@@ -25,25 +31,30 @@ const ResumeDetails = ({ isAiAssistantEnabled }) => {
   useEffect(() => {
     const fetchResume = async () => {
       try {
+        setLoading(true);
+        clearErrors();
         const res = await getResume(resumeId);
         setResume(res);
       } catch (e) {
         addError(e.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchResume();
-  }, [resumeId]);
-
-  const handleDeleteClick = async () => {
-    try {
-      await deleteResume(resumeId);
-      navigate("/resumes");
-    } catch (e) {
-      addError(e.message);
-    }
-  };
+  }, [resumeId, addError, clearErrors, setLoading]);
 
   useEffect(() => {
+    const handleDeleteClick = async () => {
+      try {
+        clearErrors();
+        await deleteResume(resumeId);
+        navigate("/resumes");
+      } catch (e) {
+        addError(e.message);
+      }
+    };
+
     setHeader({
       title: "Resume Details",
       actions: (
@@ -54,21 +65,31 @@ const ResumeDetails = ({ isAiAssistantEnabled }) => {
         </>
       ),
     });
-  }, [resumeId]);
+  }, [resumeId, addError, clearErrors, navigate, setHeader]);
 
-  if (resume?._id === null) return <LoadingSpinner />;
+  if (loading) return <LoadingSpinner />;
   if (!resume?._id) return <h3>Resume Not Found</h3>;
 
   return (
     <>
       {errors.length > 0 && (
-        <div id="error-message">{errors.map((e) => <p key={e}>{e}</p>)}</div>
+        <div id="error-message">
+          {errors.map((e) => (
+            <p key={e}>{e}</p>
+          ))}
+        </div>
       )}
       <div className="resume-container">
         {/* Header */}
         <div className="resume-header">
           <h1 className="resume-name">{resume.name}</h1>
-          <div className="resume-version" style={{float: "left", opacity: 0.7}}> v{resume.version || "0"}</div>
+          <div
+            className="resume-version"
+            style={{ float: "left", opacity: 0.7 }}
+          >
+            {" "}
+            v{resume.version || "0"}
+          </div>
           {resume.link && (
             <div className="resume-link-header">
               <a href={resume.link} target="_blank" rel="noopener noreferrer">
@@ -79,9 +100,7 @@ const ResumeDetails = ({ isAiAssistantEnabled }) => {
         </div>
 
         {/* Summary */}
-        {resume.summary && (
-          <p className="resume-summary">{resume.summary}</p>
-        )}
+        {resume.summary && <p className="resume-summary">{resume.summary}</p>}
 
         {/* Experience */}
         {resume.experience?.length > 0 && (
@@ -218,12 +237,11 @@ const ResumeDetails = ({ isAiAssistantEnabled }) => {
       )}
 
       <h2>Job Applications</h2>
-      <ApplicationList
-        filterColumn="resume"
-        filterId={resumeId}
-      />
+      <ApplicationList filterColumn="resume" filterId={resumeId} />
 
-      {isAiAssistantEnabled && <AIChatPanel docType="resume" documentId={resumeId} />}
+      {isAiAssistantEnabled && (
+        <AIChatPanel docType="resume" documentId={resumeId} />
+      )}
 
       <DocumentLineagePanel document={resume} basePath="/resumes" />
     </>
