@@ -99,7 +99,7 @@ const ResumeForm = () => {
           experience:
             res.experience?.map((exp) => ({
               ...exp,
-              company: exp.company?._id ?? exp.company ?? "",
+              company: exp.company ?? {}, //?._id ?? exp.company ?? "",
               startDate: exp.startDate ? exp.startDate.split("T")[0] : "",
               endDate: exp.endDate ? exp.endDate.split("T")[0] : "",
               description: exp.description ?? "",
@@ -112,7 +112,7 @@ const ResumeForm = () => {
           projects:
             res.projects?.map((proj) => ({
               ...proj,
-              company: proj.company?._id ?? proj.company ?? "",
+              company: proj.company ?? {}, //?._id ?? proj.company ?? "",
               year: proj.year ?? "",
               link: proj.link ?? "",
               description: proj.description ?? "",
@@ -120,7 +120,7 @@ const ResumeForm = () => {
           certifications:
             res.certifications?.map((cert) => ({
               ...cert,
-              company: cert.company?._id ?? cert.company ?? "",
+              company: cert.company ?? {}, //?._id ?? cert.company ?? "",
               year: cert.year ?? "",
               description: cert.description ?? "",
             })) ?? [],

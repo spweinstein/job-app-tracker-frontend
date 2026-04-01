@@ -24,6 +24,7 @@ import {
 import useErrors from "../../hooks/useErrors.js";
 import { resumeUpdateSchema } from "../../schemas/resumes.js";
 import { flattenZodErrors } from "../../schemas/common.js";
+import LoadingSpinner from "../shared/ui/LoadingSpinner.jsx";
 
 const EMPTY_EXPERIENCE = {
   company: "",
@@ -73,6 +74,7 @@ const ResumeEdit = () => {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
+    _id: "",
     name: "",
     link: "",
     summary: "",
@@ -93,6 +95,7 @@ const ResumeEdit = () => {
         clearErrors();
         const res = await getResume(resumeId);
         setFormData({
+          _id: res._id ?? "",
           name: res.name ?? "",
           link: res.link ?? "",
           summary: res.summary ?? "",
@@ -100,7 +103,7 @@ const ResumeEdit = () => {
           experience:
             res.experience?.map((exp) => ({
               ...exp,
-              company: exp.company?._id ?? exp.company ?? "",
+              company: exp.company ?? {}, //exp.company ?? "",
               startDate: exp.startDate ? exp.startDate.split("T")[0] : "",
               endDate: exp.endDate ? exp.endDate.split("T")[0] : "",
               description: exp.description ?? "",
@@ -113,7 +116,7 @@ const ResumeEdit = () => {
           projects:
             res.projects?.map((proj) => ({
               ...proj,
-              company: proj.company?._id ?? proj.company ?? "",
+              company: proj.company ?? {}, //?._id ?? proj.company ?? "",
               year: proj.year ?? "",
               link: proj.link ?? "",
               description: proj.description ?? "",
@@ -121,7 +124,7 @@ const ResumeEdit = () => {
           certifications:
             res.certifications?.map((cert) => ({
               ...cert,
-              company: cert.company?._id ?? cert.company ?? "",
+              company: cert.company ?? {}, //?._id ?? cert.company ?? "",
               year: cert.year ?? "",
               description: cert.description ?? "",
             })) ?? [],

@@ -20,6 +20,7 @@ import {
 import useErrors from "../../hooks/useErrors.js";
 import { coverLetterUpdateSchema } from "../../schemas/coverLetters.js";
 import { flattenZodErrors } from "../../schemas/common.js";
+import LoadingSpinner from "../shared/ui/LoadingSpinner.jsx";
 
 const CoverLetterEdit = () => {
   const { setHeader = () => {} } = useOutletContext() ?? {};
@@ -27,6 +28,7 @@ const CoverLetterEdit = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
+    _id: "",
     name: "",
     body: "",
     notes: "",
@@ -43,12 +45,15 @@ const CoverLetterEdit = () => {
         const res = await getCoverLetter(coverLetterId);
         const { name, body, notes } = res;
         setFormData({
+          _id: res._id ?? "",
           name: name ?? "",
           body: body ?? "",
           notes: notes ?? "",
         });
       } catch (e) {
         addError(e.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchCoverLetter();

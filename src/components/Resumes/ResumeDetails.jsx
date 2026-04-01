@@ -237,7 +237,7 @@ const ResumeDetails = ({ isAiAssistantEnabled }) => {
       )}
 
       <h2>Job Applications</h2>
-      <ApplicationList filterColumn="resume" filterId={resumeId} />
+      <ApplicationList initialParams={{ resume: resumeId }} isEmbedded={true} />
 
       {isAiAssistantEnabled && (
         <AIChatPanel docType="resume" documentId={resumeId} />
