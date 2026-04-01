@@ -16,10 +16,9 @@ const getToken = () => {
 This function gets the base URL from the .env file.
 */
 const getBaseURL = () => {
-  const baseURL =
-    import.meta.env.VITE_PRODUCTION === "true"
-      ? import.meta.env.VITE_BACK_END_SERVER_URL_PROD
-      : import.meta.env.VITE_BACK_END_SERVER_URL_DEV;
+  const baseURL = import.meta.env.PROD
+    ? import.meta.env.VITE_BACK_END_SERVER_URL_PROD
+    : import.meta.env.VITE_BACK_END_SERVER_URL_DEV;
   if (!baseURL) {
     throw new Error("Base URL is not set");
   }
