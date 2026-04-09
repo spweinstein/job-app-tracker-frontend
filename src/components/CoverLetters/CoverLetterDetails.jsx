@@ -14,8 +14,7 @@ import {
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
 import ApplicationList from "../Applications/ApplicationList.jsx";
-import AIChatPanel from "../shared/layout/ChatPanel/AIChat.jsx";
-const CoverLetterDetails = ({ isAiAssistantEnabled }) => {
+const CoverLetterDetails = () => {
   const { setHeader = () => {} } = useOutletContext() ?? {};
   const [coverLetter, setCoverLetter] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -85,9 +84,6 @@ const CoverLetterDetails = ({ isAiAssistantEnabled }) => {
         ]}
       />
       <ApplicationList filterColumn="coverLetter" filterId={coverLetterId} />
-      {isAiAssistantEnabled && (
-        <AIChatPanel docType="cover_letter" documentId={coverLetterId} />
-      )}
       <DocumentLineagePanel document={coverLetter} basePath="/cover-letters" />
     </>
   );

@@ -1,19 +1,12 @@
 import { useContext } from "react";
 import { Outlet, Navigate, useLocation } from "react-router";
 import AppSidebar from "../AppSidebar/AppSidebar.jsx";
-import ChatPanel from "../ChatPanel/ChatPanel.jsx";
 import Landing from "../../../Landing/Landing.jsx";
 
 import "./AppLayout.css";
 import { UserContext } from "../../../../contexts/UserContext.jsx";
 
-const AppLayout = ({
-  sidebarOpen,
-  onSidebarClose,
-  chatOpen,
-  onChatClose,
-  isAiAssistantEnabled,
-}) => {
+const AppLayout = ({ sidebarOpen, onSidebarClose }) => {
   const { user } = useContext(UserContext);
   const location = useLocation();
   if (!user) {
@@ -29,13 +22,7 @@ const AppLayout = ({
   }
 
   return (
-    <div
-      className={
-        "app-layout" +
-        (user ? " app-layout--has-sidebar" : "") +
-        (chatOpen && isAiAssistantEnabled ? " app-layout--has-chat" : "")
-      }
-    >
+    <div className={"app-layout" + (user ? " app-layout--has-sidebar" : "")}>
       <>
         {/* Left sidebar (nav) */}
         <div
@@ -57,17 +44,6 @@ const AppLayout = ({
         <main className="app-layout__main">
           <Outlet />
         </main>
-
-        {/* Right sidebar (global chat) */}
-        {isAiAssistantEnabled && (
-          <aside
-            className={
-              "right-sidebar" + (chatOpen ? " right-sidebar--open" : "")
-            }
-          >
-            <ChatPanel onClose={onChatClose} />
-          </aside>
-        )}
       </>
     </div>
   );

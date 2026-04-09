@@ -11,7 +11,6 @@ import {
 import useErrors from "../../hooks/useErrors.js";
 import DocumentLineagePanel from "../shared/views/DocumentLineagePanel/DocumentLineagePanel.jsx";
 import ApplicationList from "../Applications/ApplicationList.jsx";
-import AIChatPanel from "../shared/layout/ChatPanel/AIChat.jsx";
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -20,7 +19,7 @@ const formatDate = (dateStr) => {
   });
 };
 
-const ResumeDetails = ({ isAiAssistantEnabled }) => {
+const ResumeDetails = () => {
   const { setHeader = () => {} } = useOutletContext() ?? {};
   const { errors, addError, clearErrors } = useErrors();
   const [loading, setLoading] = useState(true);
@@ -238,10 +237,6 @@ const ResumeDetails = ({ isAiAssistantEnabled }) => {
 
       <h2>Job Applications</h2>
       <ApplicationList initialParams={{ resume: resumeId }} isEmbedded={true} />
-
-      {isAiAssistantEnabled && (
-        <AIChatPanel docType="resume" documentId={resumeId} />
-      )}
 
       <DocumentLineagePanel document={resume} basePath="/resumes" />
     </>
