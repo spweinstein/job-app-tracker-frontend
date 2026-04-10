@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import CompanySidebarList from "../../../Companies/CompanySidebarList.jsx";
 import ApplicationSidebarList from "../../../Applications/ApplicationSidebarList.jsx";
@@ -7,6 +7,7 @@ import CoverLetterSidebarList from "../../../CoverLetters/CoverLetterSidebarList
 import "./AppSidebar.css";
 
 const SECTIONS = [
+  { key: "dashboard", label: "Dashboard", path: "/" },
   { key: "companies", label: "Companies", path: "/companies" },
   { key: "applications", label: "Applications", path: "/applications" },
   { key: "resumes", label: "Resumes", path: "/resumes" },
@@ -14,6 +15,7 @@ const SECTIONS = [
 ];
 
 const SECTION_LISTS = {
+  dashboard: <ApplicationSidebarList />,
   companies: <CompanySidebarList />,
   applications: <ApplicationSidebarList />,
   resumes: <ResumeSidebarList />,
@@ -23,10 +25,21 @@ const SECTION_LISTS = {
 const AppSidebar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const [activeSection, setActiveSection] = useState("");
 
   // Derive the active section from the current URL
-  const activeSection =
-    SECTIONS.find((s) => pathname.startsWith(s.path))?.key ?? SECTIONS[0].key;
+  // If the current path is the root path, the active section is "dashboard"
+  // Otherwise, the active section is the section that the current path starts with
+  useEffect(() => {
+    if (pathname === "/") {
+      setActiveSection("dashboard");
+    } else {
+      setActiveSection(
+        SECTIONS.find((s) => s.path !== "/" && pathname.startsWith(s.path))
+          ?.key ?? SECTIONS[0].key,
+      );
+    }
+  }, [pathname]);
 
   const handleSectionClick = (section, path) => {
     navigate(path);
