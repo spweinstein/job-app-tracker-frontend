@@ -6,7 +6,10 @@ import "./DetailsCard.css";
  * (as opposed to a string, number, or React element).
  */
 const isFieldObj = (prop) =>
-  prop != null && typeof prop === "object" && !isValidElement(prop) && "label" in prop;
+  prop != null &&
+  typeof prop === "object" &&
+  !isValidElement(prop) &&
+  "label" in prop;
 
 /**
  * Renders a header slot: as a labeled card-field row when given { label, value },
@@ -35,13 +38,27 @@ const HeaderSlot = ({ prop, defaultClass }) => {
  * @param {string}                  className  Optional extra class on the outer card div
  * @param {ReactNode}               children   Free-form content below the field list
  */
-const DetailsCard = ({ title, subtitle, fields = [], className = "", children }) => (
+const DetailsCard = ({
+  title,
+  errors,
+  subtitle,
+  fields = [],
+  className = "",
+  children,
+}) => (
   <div className={`card ${className}`.trim()}>
-
     {(title || subtitle) && (
       <div className="card-header">
-        <HeaderSlot prop={title}    defaultClass="card-title" />
+        <HeaderSlot prop={title} defaultClass="card-title" />
         <HeaderSlot prop={subtitle} defaultClass="card-subtitle" />
+      </div>
+    )}
+
+    {errors && (
+      <div id="error-message">
+        {errors.map((e) => (
+          <p key={e}>{e}</p>
+        ))}
       </div>
     )}
 
@@ -55,7 +72,6 @@ const DetailsCard = ({ title, subtitle, fields = [], className = "", children })
       ))}
 
     {children}
-
   </div>
 );
 

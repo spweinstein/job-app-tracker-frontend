@@ -1,12 +1,23 @@
 import { useState, useEffect } from "react";
 import { createCompany } from "../../services/companyService";
 import { useNavigate } from "react-router";
-import { FormRow, FormField, TextInput, TextAreaInput, FormContainer } from "../shared/forms";
+import {
+  FormRow,
+  FormField,
+  TextInput,
+  TextAreaInput,
+  FormContainer,
+} from "../shared/forms";
 import useErrors from "../../hooks/useErrors.js";
 import { BackButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
+import { useOutletContext } from "react-router";
+import { companySubmitSchema } from "../../schemas/companies.js";
+import { flattenZodErrors } from "../../schemas/common.js";
 
-const CompanyForm = ({ setHeader = () => {} }) => {
-  const {errors, addError, clearErrors} = useErrors();
+const CompanyForm = () => {
+  const { setHeader } = useOutletContext();
+  const { errors, addError, clearErrors } = useErrors();
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -22,7 +33,7 @@ const CompanyForm = ({ setHeader = () => {} }) => {
       title: "New Company",
       actions: <BackButton onClick={() => navigate(-1)} />,
     });
-  }, []);
+  }, [navigate, setHeader]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,19 +42,30 @@ const CompanyForm = ({ setHeader = () => {} }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    clearErrors();
+    setFieldErrors({});
+    const parsed = companySubmitSchema.safeParse(formData);
+    if (!parsed.success) {
+      setFieldErrors(flattenZodErrors(parsed.error));
+      return;
+    }
     setSubmitting(true);
     try {
-      const res = await createCompany(formData);
+      await createCompany(parsed.data);
       navigate("/companies");
-    } catch (e) {
-      addError(e.message);
+    } catch (err) {
+      addError(err.message);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <FormContainer className="crud-form" onSubmit={handleSubmit} errors={errors}>
+    <FormContainer
+      className="crud-form"
+      onSubmit={handleSubmit}
+      errors={errors}
+    >
       <FormRow>
         <FormField label="Name">
           <TextInput
@@ -51,10 +73,16 @@ const CompanyForm = ({ setHeader = () => {} }) => {
             value={formData.name}
             onChange={handleChange}
             required
+            error={fieldErrors.name}
           />
         </FormField>
         <FormField label="Website">
-          <TextInput name="url" value={formData.url} onChange={handleChange} />
+          <TextInput
+            name="url"
+            value={formData.url}
+            onChange={handleChange}
+            error={fieldErrors.url}
+          />
         </FormField>
       </FormRow>
       <FormField label="Description">
@@ -62,6 +90,7 @@ const CompanyForm = ({ setHeader = () => {} }) => {
           name="description"
           value={formData.description}
           onChange={handleChange}
+          error={fieldErrors.description}
         />
       </FormField>
       <FormField label="Notes">
@@ -69,6 +98,7 @@ const CompanyForm = ({ setHeader = () => {} }) => {
           name="notes"
           value={formData.notes}
           onChange={handleChange}
+          error={fieldErrors.notes}
         />
       </FormField>
       <div className="actions">

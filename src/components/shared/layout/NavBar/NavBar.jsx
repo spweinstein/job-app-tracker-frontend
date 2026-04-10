@@ -3,7 +3,10 @@ import { NavLink, useNavigate } from "react-router";
 import { UserContext } from "../../../../contexts/UserContext.jsx";
 import "./NavBar.css";
 
-const NavBar = ({ sidebarOpen, onMenuToggle }) => {
+const NavBar = ({
+  sidebarOpen,
+  onMenuToggle,
+}) => {
   const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
@@ -35,12 +38,19 @@ const NavBar = ({ sidebarOpen, onMenuToggle }) => {
       </div>
 
       <div className="navbar__right">
+
         {user ? (
-          <button className="navbar__link" onClick={handleLogout}>Logout</button>
+          <button className="navbar__link" onClick={handleLogout}>
+            Logout
+          </button>
         ) : (
           <>
-            <NavLink to="/login"    className="navbar__link">Login</NavLink>
-            <NavLink to="/register" className="navbar__link navbar__link--cta">Register</NavLink>
+            <NavLink to="/login" className="navbar__link">
+              Login
+            </NavLink>
+            <NavLink to="/register" className="navbar__link navbar__link--cta">
+              Register
+            </NavLink>
           </>
         )}
       </div>

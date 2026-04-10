@@ -2,17 +2,25 @@ import { NavLink } from "react-router";
 import { getCompanies } from "../../services/companyService.js";
 import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
-
+import { LoadingSpinner } from "../shared/ui/index.js";
 const CompanySidebarList = () => {
-  const { data, query, setQuery } = usePaginatedQuery(getCompanies, {
-    defaultLimit: 10,
-  });
+  const { params, response, setFilter, loading } = usePaginatedQuery(
+    getCompanies,
+    {
+      page: 1,
+      limit: 10,
+      sort: "updatedAt",
+      sortDir: "desc",
+    },
+  );
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <>
       <ListSearch
-        value={query}
-        onChange={setQuery}
+        value={params.q}
+        onChange={setFilter}
         placeholder="Search companies…"
       />
       <ul className="sidebar-list">
@@ -21,7 +29,7 @@ const CompanySidebarList = () => {
             + New Company
           </NavLink>
         </li>
-        {data.map((c) => (
+        {response.data.map((c) => (
           <li key={c._id}>
             <NavLink to={`/companies/${c._id}`}>{c.name}</NavLink>
           </li>

@@ -1,91 +1,118 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+
+const EMPTY_INITIAL = Object.freeze({});
+
+function normalizeIncoming(raw) {
+  if (raw == null) return {};
+  const next = { ...raw };
+  if (next.defaultLimit != null && next.limit == null) {
+    next.limit = next.defaultLimit;
+    delete next.defaultLimit;
+  }
+  return next;
+}
+
+function buildInitialParams(incoming) {
+  const i = normalizeIncoming(incoming);
+  return {
+    q: "",
+    sort: i.sort ?? "updatedAt",
+    sortDir: i.sortDir ?? "desc",
+    page: i.page ?? 1,
+    limit: i.limit ?? 20,
+    ...i,
+  };
+}
 
 /**
- * @param {Function} fetchFn - Service function that accepts a params object
- *                             and returns { data, total, totalPages, page }
- * @param {object}  options
- * @param {string}  options.defaultSort    - Initial sort field (default: "updatedAt")
- * @param {string}  options.defaultSortDir - Initial sort direction (default: "desc")
- * @param {number}  options.defaultLimit   - Page size sent to the server (default: 20)
+ * @param {Function} fetchFn - (params) => Promise<{ data, total, totalPages }>
+ * @param {object} [incoming] - Initial / parent-driven fields; refetches merged when JSON snapshot changes.
  */
-const usePaginatedQuery = (fetchFn, options = {}) => {
-  const {
-    defaultSort = "updatedAt",
-    defaultSortDir = "desc",
-    defaultLimit = 10,
-    params
-  } = options;
+const usePaginatedQuery = (fetchFn, incoming = EMPTY_INITIAL) => {
+  const incomingRef = useRef(incoming);
+  incomingRef.current = incoming;
+  const incomingKey = JSON.stringify(incoming ?? {});
 
-  const [query, setQueryState] = useState("");
-  const [sortField, setSortField] = useState(defaultSort);
-  const [sortDir, setSortDir] = useState(defaultSortDir);
-  const [page, setPage] = useState(1);
+  const [params, setParamsState] = useState(() => buildInitialParams(incoming));
 
-  const [data, setData] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState([]);
+  const [response, setResponse] = useState({
+    data: [],
+    total: 0,
+    totalPages: 1,
+    loading: false,
+    errors: [],
+  });
 
+  useEffect(() => {
+    setParamsState((prev) => ({
+      ...prev,
+      ...normalizeIncoming(incomingRef.current),
+    }));
+  }, [incomingKey]);
+
+  const setParams = useCallback((update) => {
+    setParamsState((prev) => {
+      const patch = typeof update === "function" ? update(prev) : update;
+      return { ...prev, ...normalizeIncoming(patch) };
+    });
+  }, []);
+
+  const setFilter = useCallback((q) => {
+    setParamsState((prev) => ({ ...prev, q, page: 1 }));
+  }, []);
+
+  const setSortField = useCallback((field) => {
+    setParamsState((prev) => ({ ...prev, sort: field, page: 1 }));
+  }, []);
+
+  const toggleSort = useCallback((field) => {
+    setParamsState((prev) => {
+      if (field === prev.sort) {
+        return {
+          ...prev,
+          sortDir: prev.sortDir === "asc" ? "desc" : "asc",
+          page: 1,
+        };
+      }
+      return { ...prev, sort: field, sortDir: "asc", page: 1 };
+    });
+  }, []);
+
+  // Fetch the data from the API
+  // Wrap in useCallback to prevent unnecessary re-renders
   const fetch = useCallback(async () => {
-    setLoading(true);
-    setErrors([]);
+    setResponse((r) => ({ ...r, loading: true, errors: [] }));
     try {
-      const res = await fetchFn({
-        q: query,
-        sort: sortField,
-        sortDir,
-        page,
-        limit: defaultLimit,
-        ...params
+      const res = await fetchFn({ ...params });
+      setResponse({
+        data: res.data,
+        total: res.total,
+        totalPages: res.totalPages,
+        loading: false,
+        errors: [],
       });
-      setData(res.data);
-      setTotal(res.total);
-      setTotalPages(res.totalPages);
     } catch (e) {
-      setErrors([e.message]);
-    } finally {
-      setLoading(false);
+      setResponse((r) => ({
+        ...r,
+        loading: false,
+        errors: [e.message],
+      }));
     }
-  }, [fetchFn, query, sortField, sortDir, page, defaultLimit]);
+  }, [fetchFn, params]);
 
   useEffect(() => {
     fetch();
   }, [fetch]);
 
-  const setQuery = (value) => {
-    setQueryState(value);
-    setPage(1);
-  };
-
-  const toggleSort = (field) => {
-    if (field === sortField) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortField(field);
-      setSortDir("asc");
-    }
-    setPage(1);
-  };
-
-  const refresh = () => fetch();
+  const refresh = useCallback(() => fetch(), [fetch]);
 
   return {
-    // data
-    data,
-    total,
-    totalPages,
-    loading,
-    errors,
-    // controls
-    query,
-    setQuery,
-    sortField,
-    sortDir,
+    params,
+    setParams,
+    response,
+    setFilter,
+    setSortField,
     toggleSort,
-    page,
-    setPage,
-    // manual refresh (e.g. after delete)
     refresh,
   };
 };

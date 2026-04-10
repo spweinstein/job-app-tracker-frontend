@@ -4,43 +4,60 @@ import {
   updateCoverLetter,
   deleteCoverLetter,
 } from "../../services/coverLetterService.js";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useOutletContext } from "react-router";
 import {
   TextInput,
   TextAreaInput,
   FormContainer,
   FormField,
 } from "../shared/forms/index.js";
-import { BackButton, DeleteButton, SubmitButton, CancelButton } from "../shared/ui/index.js";
+import {
+  BackButton,
+  DeleteButton,
+  SubmitButton,
+  CancelButton,
+} from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
+import { coverLetterUpdateSchema } from "../../schemas/coverLetters.js";
+import { flattenZodErrors } from "../../schemas/common.js";
+import LoadingSpinner from "../shared/ui/LoadingSpinner.jsx";
 
-const CoverLetterEdit = ({ setHeader = () => {} }) => {
-  const {errors, addError, clearErrors} = useErrors();
+const CoverLetterEdit = () => {
+  const { setHeader = () => {} } = useOutletContext() ?? {};
+  const { errors, addError, clearErrors } = useErrors();
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
+    _id: "",
     name: "",
     body: "",
     notes: "",
   });
+  const [loading, setLoading] = useState(true);
   const { coverLetterId } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCoverLetter = async () => {
       try {
+        setLoading(true);
+        clearErrors();
         const res = await getCoverLetter(coverLetterId);
         const { name, body, notes } = res;
         setFormData({
+          _id: res._id ?? "",
           name: name ?? "",
           body: body ?? "",
           notes: notes ?? "",
         });
       } catch (e) {
         addError(e.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchCoverLetter();
-  }, [coverLetterId]);
+  }, [coverLetterId, addError, clearErrors, setLoading]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,27 +66,33 @@ const CoverLetterEdit = ({ setHeader = () => {} }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    clearErrors();
+    setFieldErrors({});
+    const parsed = coverLetterUpdateSchema.safeParse(formData);
+    if (!parsed.success) {
+      setFieldErrors(flattenZodErrors(parsed.error));
+      return;
+    }
     setSubmitting(true);
     try {
-      await updateCoverLetter(coverLetterId, formData);
+      await updateCoverLetter(coverLetterId, parsed.data);
       navigate(`/cover-letters/${coverLetterId}`);
-    } catch (e) {
-      addError(e.message);
+    } catch (err) {
+      addError(err.message);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDeleteClick = async () => {
-    try {
-      await deleteCoverLetter(coverLetterId);
-      navigate("/cover-letters");
-    } catch (e) {
-      addError(e.message);
-    }
-  };
-
   useEffect(() => {
+    const handleDeleteClick = async () => {
+      try {
+        await deleteCoverLetter(coverLetterId);
+        navigate("/cover-letters");
+      } catch (e) {
+        addError(e.message);
+      }
+    };
     setHeader({
       title: "Edit Cover Letter",
       actions: (
@@ -79,15 +102,23 @@ const CoverLetterEdit = ({ setHeader = () => {} }) => {
         </>
       ),
     });
-  }, [coverLetterId]);
+  }, [coverLetterId, setHeader, navigate, addError]);
+
+  if (loading) return <LoadingSpinner />;
+  if (!formData?._id) return <h3>Cover Letter Not Found</h3>;
 
   return (
-    <FormContainer className="crud-form" onSubmit={handleSubmit} errors={errors}>
+    <FormContainer
+      className="crud-form"
+      onSubmit={handleSubmit}
+      errors={errors}
+    >
       <FormField label="Name">
         <TextInput
           name="name"
           value={formData.name}
           onChange={handleChange}
+          error={fieldErrors.name}
         />
       </FormField>
 
@@ -96,6 +127,7 @@ const CoverLetterEdit = ({ setHeader = () => {} }) => {
           name="body"
           value={formData.body}
           onChange={handleChange}
+          error={fieldErrors.body}
         />
       </FormField>
       <FormField label="Notes">
@@ -103,6 +135,7 @@ const CoverLetterEdit = ({ setHeader = () => {} }) => {
           name="notes"
           value={formData.notes}
           onChange={handleChange}
+          error={fieldErrors.notes}
         />
       </FormField>
       <div className="actions">

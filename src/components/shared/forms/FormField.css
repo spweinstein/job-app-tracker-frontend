@@ -52,3 +52,10 @@ form.crud-form {
 .crud-form button[type="submit"] {
   margin-top: var(--space-md);
 }
+
+.field-error {
+  display: block;
+  margin-top: var(--space-xs, 4px);
+  font-size: 13px;
+  color: var(--danger, #c0392b);
+}

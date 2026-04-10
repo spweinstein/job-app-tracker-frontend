@@ -4,8 +4,6 @@ export const getCompanies = async (params={}) => {
   try {
     const { data } = await api.get("/companies", { params });
     if (data.error) throw new Error(data.error);
-    console.log(data);
-
     return data;
   } catch (e) {
     throw e.response?.data?.error ? new Error(e.response.data.error) : e;

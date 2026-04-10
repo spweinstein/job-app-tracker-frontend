@@ -1,18 +1,30 @@
-import { useState, useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { getCompanies, deleteCompany } from "../../services/companyService.js";
 import { Link, useNavigate } from "react-router";
 import { DataTable } from "../shared/views/index.js";
-import { DeleteButton, EditButton, LoadingSpinner } from "../shared/ui/index.js";
+import {
+  DeleteButton,
+  EditButton,
+  LoadingSpinner,
+} from "../shared/ui/index.js";
 import useErrors from "../../hooks/useErrors.js";
 import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
 import { ListPagination } from "../shared/list/ListPagination.jsx";
+import { useOutletContext } from "react-router";
 
-const CompanyList = ({ setHeader = () => {} }) => {
+const CompanyList = () => {
   const navigate = useNavigate();
+  const { setHeader } = useOutletContext();
 
-  const {errors, addError, clearErrors} = useErrors();
-  const {data, total, totalPages, loading, query, setQuery, sortField, sortDir, toggleSort, page, setPage, refresh} = usePaginatedQuery(getCompanies);
+  const { errors, addError, clearErrors } = useErrors();
+  const { params, setParams, response, setFilter, toggleSort, refresh } =
+    usePaginatedQuery(getCompanies, {
+      page: 1,
+      limit: 10,
+      sort: "updatedAt",
+      sortDir: "desc",
+    });
 
   useEffect(() => {
     setHeader({
@@ -23,20 +35,20 @@ const CompanyList = ({ setHeader = () => {} }) => {
         </Link>
       ),
     });
-  }, []);
+  }, [setHeader]);
 
-  const handleEdit = (companyId) => {
-    navigate(`/companies/${companyId}/edit`);
-  };
-
-  const handleDelete = async (companyId) => {
-    try {
-      await deleteCompany(companyId);
-      refresh();
-    } catch (error) {
-      addError(error.message);
-    }
-  };
+  const handleDelete = useCallback(
+    async (companyId) => {
+      try {
+        await deleteCompany(companyId);
+        refresh();
+        clearErrors();
+      } catch (error) {
+        addError(error.message);
+      }
+    },
+    [refresh, addError, clearErrors],
+  );
 
   const columns = [
     {
@@ -58,35 +70,51 @@ const CompanyList = ({ setHeader = () => {} }) => {
       key: "actions",
       label: "Actions",
       isActions: true,
-      render: (row, {tableWidth}) => (
+      render: (row, { tableWidth }) => (
         <div className="actions">
-          <EditButton onClick={() => navigate(`/companies/${row._id}/edit`)} size={tableWidth < 500 ? "icon" : "xs"} />
-          <DeleteButton onClick={() => handleDelete(row._id)} size={tableWidth < 500 ? "icon" : "xs"} />
+          <EditButton
+            onClick={() => navigate(`/companies/${row._id}/edit`)}
+            size={tableWidth < 500 ? "icon" : "xs"}
+          />
+          <DeleteButton
+            onClick={() => handleDelete(row._id)}
+            size={tableWidth < 500 ? "icon" : "xs"}
+          />
         </div>
       ),
     },
   ];
 
+  if (response.loading) return <LoadingSpinner />;
+
   return (
     <>
       {errors.length > 0 && (
-        <div id="error-message">{errors.map((e) => <p key={e}>{e}</p>)}</div>
+        <div id="error-message">
+          {errors.map((e) => (
+            <p key={e}>{e}</p>
+          ))}
+        </div>
       )}
       <ListSearch
-        value={query}
-        onChange={setQuery}
+        value={params.q}
+        onChange={setFilter}
         placeholder="Search companies…"
-        total={total}
+        total={response.total}
       />
-      <ListPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-      {loading ? (
+      <ListPagination
+        page={params.page}
+        totalPages={response.totalPages}
+        onPageChange={(page) => setParams({ ...params, page })}
+      />
+      {response.loading ? (
         <LoadingSpinner />
-        ) : (
+      ) : (
         <DataTable
           columns={columns}
-          data={data}
-          sortField={sortField}
-          sortDir={sortDir}
+          data={response.data}
+          sortField={params.sort}
+          sortDir={params.sortDir}
           onSort={toggleSort}
           emptyState={<p>No companies found.</p>}
         />

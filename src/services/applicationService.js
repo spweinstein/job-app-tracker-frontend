@@ -16,7 +16,7 @@ export const getApplication = async (applicationId) => {
     if (data.error) throw new Error(data.error);
     return data;
   } catch (e) {
-    throw e.response?.data?.err ? new Error(e.response.data.err) : e;
+    throw e.response?.data?.error ? new Error(e.response.data.error) : e;
   }
 };
 

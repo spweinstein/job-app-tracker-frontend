@@ -1,5 +1,5 @@
 // custom hook to manage form errors
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 /*
 Usage:
@@ -19,16 +19,19 @@ return (
 const useErrors = () => {
   const [errors, setErrors] = useState([]);
 
-  const addError = (message) => {
-    // Ensure we can handle multiple errors
-    setErrors((prevErrors) => ([...prevErrors, message]));
-  };
+  const addError = useCallback(
+    (message) => {
+      // Ensure we can handle multiple errors
+      setErrors((prevErrors) => [...prevErrors, message]);
+    },
+    [setErrors],
+  );
 
-  const clearErrors = () => {
+  const clearErrors = useCallback(() => {
     setErrors([]);
-  };
+  }, [setErrors]);
 
-  return {errors, addError, clearErrors};
+  return { errors, addError, clearErrors };
 };
 
 export default useErrors;

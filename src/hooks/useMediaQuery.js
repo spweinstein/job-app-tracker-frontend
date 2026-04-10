@@ -13,7 +13,7 @@ const useIsMobile = () => {
 
     // 3. Clean up the listener when the component unmounts
     return () => mql.removeEventListener("change", handler);
-  }, []);
+  }, [mql]);
 
   return isMobile; // just a boolean
 };
@@ -22,12 +22,15 @@ const useMediaQuery = (query) => {
   const [matches, setMatches] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia(query);
-    if (media.matches !== matches) {
-      setMatches(media.matches);
-    }
-  }, [matches, query]);
+    const checkForMatch = async () => {
+      const media = window.matchMedia(query);
+      if (media.matches !== matches) {
+        setMatches(media.matches);
+      }
+    };
+    checkForMatch();
+  }, [query, matches]);
   return matches;
 };
 
-export default useIsMobile;
+export { useIsMobile, useMediaQuery };
