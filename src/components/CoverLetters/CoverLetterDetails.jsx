@@ -83,7 +83,10 @@ const CoverLetterDetails = () => {
           { label: "Notes", value: coverLetter.notes || null },
         ]}
       />
-      <ApplicationList filterColumn="coverLetter" filterId={coverLetterId} />
+      <ApplicationList
+        initialParams={{ coverLetter: coverLetterId }}
+        isEmbedded={true}
+      />
       <DocumentLineagePanel document={coverLetter} basePath="/cover-letters" />
     </>
   );
