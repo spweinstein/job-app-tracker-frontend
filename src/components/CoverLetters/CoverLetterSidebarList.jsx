@@ -4,17 +4,17 @@ import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
 
 const CoverLetterSidebarList = () => {
-  const { q, response, setFilter } = usePaginatedQuery(getCoverLetters, {
+  const { params, response, setFilter } = usePaginatedQuery(getCoverLetters, {
     page: 1,
     limit: 10,
     sort: "updatedAt",
-    sortDir: "asc",
+    sortDir: "desc",
   });
 
   return (
     <>
       <ListSearch
-        value={q}
+        value={params.q}
         onChange={setFilter}
         placeholder="Search cover letters…"
       />

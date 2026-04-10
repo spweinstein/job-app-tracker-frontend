@@ -19,12 +19,12 @@ const CoverLetterList = () => {
   const { setHeader = () => {} } = useOutletContext() ?? {};
   const navigate = useNavigate();
 
-  const { q, params, setParams, response, setFilter, toggleSort, refresh } =
+  const { params, setParams, response, setFilter, toggleSort, refresh } =
     usePaginatedQuery(getCoverLetters, {
       page: 1,
       limit: 10,
       sort: "updatedAt",
-      sortDir: "asc",
+      sortDir: "desc",
     });
   const { errors, addError, clearErrors } = useErrors();
 
@@ -117,7 +117,7 @@ const CoverLetterList = () => {
         </div>
       )}
       <ListSearch
-        value={q}
+        value={params.q}
         onChange={setFilter}
         placeholder="Search cover letters…"
         total={response.total}

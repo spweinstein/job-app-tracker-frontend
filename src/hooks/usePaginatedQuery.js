@@ -78,6 +78,8 @@ const usePaginatedQuery = (fetchFn, incoming = EMPTY_INITIAL) => {
     });
   }, []);
 
+  // Fetch the data from the API
+  // Wrap in useCallback to prevent unnecessary re-renders
   const fetch = useCallback(async () => {
     setResponse((r) => ({ ...r, loading: true, errors: [] }));
     try {

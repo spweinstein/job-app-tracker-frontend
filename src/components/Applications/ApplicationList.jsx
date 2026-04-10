@@ -36,12 +36,12 @@ const ApplicationList = ({
     });
   }, [isEmbedded, setHeader]);
 
-  const { q, params, setParams, response, setFilter, toggleSort, refresh } =
+  const { params, setParams, response, setFilter, toggleSort, refresh } =
     usePaginatedQuery(getApplications, {
       page: 1,
       limit: 10,
       sort: "updatedAt",
-      sortDir: "asc",
+      sortDir: "desc",
       ...initialParams,
     });
 
@@ -145,7 +145,7 @@ const ApplicationList = ({
   return (
     <>
       <ListSearch
-        value={q}
+        value={params.q}
         onChange={setFilter}
         placeholder="Search applications…"
         total={response.total}

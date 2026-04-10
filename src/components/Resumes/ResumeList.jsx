@@ -16,12 +16,12 @@ const ResumeList = () => {
   const { setHeader = () => {} } = useOutletContext() ?? {};
   const navigate = useNavigate();
   const { errors, addError, clearErrors } = useErrors();
-  const { q, params, setParams, response, setFilter, toggleSort, refresh } =
+  const { params, setParams, response, setFilter, toggleSort, refresh } =
     usePaginatedQuery(getResumes, {
       page: 1,
       limit: 10,
       sort: "updatedAt",
-      sortDir: "asc",
+      sortDir: "desc",
     });
 
   useEffect(() => {
@@ -113,7 +113,7 @@ const ResumeList = () => {
         </div>
       )}
       <ListSearch
-        value={q}
+        value={params.q}
         onChange={setFilter}
         placeholder="Search resumes…"
         total={response.total}

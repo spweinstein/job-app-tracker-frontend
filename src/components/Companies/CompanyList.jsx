@@ -18,12 +18,12 @@ const CompanyList = () => {
   const { setHeader } = useOutletContext();
 
   const { errors, addError, clearErrors } = useErrors();
-  const { q, params, setParams, response, setFilter, toggleSort, refresh } =
+  const { params, setParams, response, setFilter, toggleSort, refresh } =
     usePaginatedQuery(getCompanies, {
       page: 1,
       limit: 10,
       sort: "updatedAt",
-      sortDir: "asc",
+      sortDir: "desc",
     });
 
   useEffect(() => {
@@ -85,6 +85,8 @@ const CompanyList = () => {
     },
   ];
 
+  if (response.loading) return <LoadingSpinner />;
+
   return (
     <>
       {errors.length > 0 && (
@@ -95,7 +97,7 @@ const CompanyList = () => {
         </div>
       )}
       <ListSearch
-        value={q}
+        value={params.q}
         onChange={setFilter}
         placeholder="Search companies…"
         total={response.total}

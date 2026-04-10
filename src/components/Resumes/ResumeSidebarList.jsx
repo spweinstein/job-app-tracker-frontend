@@ -4,17 +4,17 @@ import usePaginatedQuery from "../../hooks/usePaginatedQuery.js";
 import { ListSearch } from "../shared/list/ListSearch.jsx";
 
 const ResumeSidebarList = () => {
-  const { q, response, setFilter } = usePaginatedQuery(getResumes, {
+  const { params, response, setFilter } = usePaginatedQuery(getResumes, {
     page: 1,
     limit: 10,
     sort: "updatedAt",
-    sortDir: "asc",
+    sortDir: "desc",
   });
 
   return (
     <>
       <ListSearch
-        value={q}
+        value={params.q}
         onChange={setFilter}
         placeholder="Search resumes…"
       />
