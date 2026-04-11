@@ -29,7 +29,8 @@ import AppLayout from "./components/shared/layout/AppLayout/AppLayout.jsx";
 import "./components/shared/list/ListControls.css";
 import Dashboard from "./components/Dashboard/Dashboard.jsx";
 import NotFound from "./components/NotFound/NotFound.jsx";
-
+import { UserContext } from "./contexts/UserContext.jsx";
+import { useContext } from "react";
 function App() {
   const isAiAssistantEnabled =
     import.meta.env.VITE_AI_ASSISTANT_ENABLED === "true";
@@ -40,6 +41,11 @@ function App() {
 
   const toggleChat = () => setChatOpen((o) => !o);
   const closeChat = () => setChatOpen(false);
+
+  const { user, loading } = useContext(UserContext);
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <>
@@ -102,8 +108,14 @@ function App() {
             />
           </Route>
         </Route>
-        <Route path="/login" element={<LoginForm />} />
-        <Route path="/register" element={<RegisterForm />} />
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/" /> : <LoginForm />}
+        />
+        <Route
+          path="/register"
+          element={user ? <Navigate to="/" /> : <RegisterForm />}
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
