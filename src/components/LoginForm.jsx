@@ -50,12 +50,13 @@ const LoginForm = () => {
   );
 
   return (
-    <PageContainer  errors={errors}>
+    <PageContainer errors={errors}>
       <FormContainer
         className="auth-form"
         onSubmit={handleSubmit}
         errors={formErrors}
       >
+        <h2>Sign In</h2>
         <FormField label="Username">
           <TextInput {...register("username")} error={fieldErrors.username} />
         </FormField>
