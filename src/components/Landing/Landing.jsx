@@ -1,7 +1,13 @@
 import { Link } from "react-router";
 import "./Landing.css";
-
+import { useContext } from "react";
+import { UserContext } from "../../contexts/UserContext.jsx";
+import LoadingSpinner from "../shared/ui/LoadingSpinner.jsx";
 function Landing() {
+  const { user, loading } = useContext(UserContext);
+  if (loading) {
+    return <LoadingSpinner />;
+  }
   return (
     <main className="landing">
       <section className="landing__banner" aria-labelledby="landing-heading">
@@ -12,17 +18,31 @@ function Landing() {
             One place for every application
           </h1>
           <p className="landing__lead">
-            Track companies, applications, resumes, and cover letters without the
-            spreadsheet chaos—so you can focus on landing the role.
+            Track companies, applications, resumes, and cover letters without
+            the spreadsheet chaos—so you can focus on landing the role.
           </p>
 
           <div className="landing__actions">
-            <Link className="btn btn-primary landing__cta-primary" to="/register">
-              Create account
-            </Link>
-            <Link className="btn btn-secondary landing__cta-secondary" to="/login">
-              Sign in
-            </Link>
+            {user ? (
+              <Link className="btn btn-primary landing__cta-primary" to="/">
+                My Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  className="btn btn-primary landing__cta-primary"
+                  to="/register"
+                >
+                  Create account
+                </Link>
+                <Link
+                  className="btn btn-secondary landing__cta-secondary"
+                  to="/login"
+                >
+                  Sign in
+                </Link>
+              </>
+            )}
           </div>
 
           <ul className="landing__highlights" aria-label="Features">

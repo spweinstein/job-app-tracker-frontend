@@ -21,7 +21,7 @@ const initialState = {
 };
 
 const LoginForm = () => {
-  const { errors, addError } = useErrors();
+  const { errors, addError, clearErrors } = useErrors();
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
@@ -29,6 +29,7 @@ const LoginForm = () => {
 
   const onSubmit = async (formData) => {
     setSubmitting(true);
+    clearErrors();
     try {
       const signedInUser = await login(formData);
       setUser(signedInUser);
@@ -49,7 +50,7 @@ const LoginForm = () => {
   );
 
   return (
-    <PageContainer title="Sign In" errors={errors}>
+    <PageContainer  errors={errors}>
       <FormContainer
         className="auth-form"
         onSubmit={handleSubmit}
